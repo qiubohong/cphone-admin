@@ -271,7 +271,7 @@ class BasicLayout extends React.PureComponent {
           <div className={styles.logo}>
             <Link to="/">
               <img src="https://gw.alipayobjects.com/zos/rmsportal/iwWyPinUoseUxIAeElSx.svg" alt="logo" />
-              <h1>Ant Design Pro</h1>
+              <h1>创手机-后台管理</h1>
             </Link>
           </div>
           <Menu

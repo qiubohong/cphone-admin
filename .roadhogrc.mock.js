@@ -2,6 +2,8 @@ import mockjs from 'mockjs';
 import { getRule, postRule } from './mock/rule';
 import { imgMap } from './mock/utils';
 import { getNotices } from './mock/notices';
+import { getBrands } from './mock/brand';
+import { getRecycle } from './mock/recycle';
 import { delay } from 'roadhog-api-doc';
 
 // 是否禁用代理
@@ -53,6 +55,9 @@ const proxy = {
     $body: postRule,
   },
   'GET /api/notices': getNotices,
+  'GET /phone/getBrands' : getBrands,
+  'GET /recycle/getRecyclePhones/*' : getRecycle,
+
 };
 
 export default noProxy ? {} : delay(proxy, 1000);

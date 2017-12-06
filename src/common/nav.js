@@ -17,17 +17,43 @@ export const getNavData = app => [
     children: [
       {
         name: '查询表格',
-        icon: 'mobile',
+        icon: 'bars',
         path: 'table-list',
         component: dynamicWrapper(app, ['rule'], () => import('../routes/List/TableList')),
       },{
-        name: '手机管理',
-        icon: 'android',
-        path: 'mobile',
+        name: '品牌管理',
+        icon: 'bars',
+        path: 'brand',
+        component: dynamicWrapper(app, ['brand'], () => import('../routes/phone/Brand')),
+      },{
+        name: '回收管理',
+        icon: 'retweet',
+        path: 'recycle',
         children: [{
-          name: '手机品牌',
-          path: 'brand',
-          component: dynamicWrapper(app, ['brand'], () => import('../routes/phone/Brand')),
+          name: '手机管理',
+          icon: 'mobile',
+          path: 'phone',
+          component: dynamicWrapper(app, ['brand','recycle'], () => import('../routes/recycle/RecyclePhone')),
+        },{
+          name: '订单管理',
+          icon: 'mobile',
+          path: 'order',
+          component: dynamicWrapper(app, ['brand','recycle'], () => import('../routes/recycle/RecyclePhone')),
+        }],
+      },{
+        name: '维修管理',
+        icon: 'tool',
+        path: 'repair',
+        children: [{
+          name: '手机管理',
+          icon: 'mobile',
+          path: 'phone',
+          component: dynamicWrapper(app, ['brand','recycle'], () => import('../routes/recycle/RecyclePhone')),
+        },{
+          name: '订单管理',
+          icon: 'mobile',
+          path: 'order',
+          component: dynamicWrapper(app, ['brand','recycle'], () => import('../routes/recycle/RecyclePhone')),
         }],
       },
     ],

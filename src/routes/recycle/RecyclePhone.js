@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Row, Col, Card, Form, Input, Select, Icon, Button, InputNumber, Table, Modal, Spin, message, notification, Radio } from 'antd';
+import { Row, Col, Card, Collapse, Form, Input, Select, Icon, Button, InputNumber, Table, Modal, Spin, message, notification, Radio } from 'antd';
 import StandardTable from '../../components/StandardTable';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
@@ -8,6 +8,7 @@ import styles from '../Table.less';
 
 const FormItem = Form.Item;
 const { Option } = Select;
+const Panel = Collapse.Panel;
 
 const RadioGroup = Radio.Group;
 const getValue = obj => Object.keys(obj).map(key => obj[key]).join(',');
@@ -30,7 +31,8 @@ export default class Phone extends PureComponent {
         modalVisible: false,
         operation: false,
         quesVisible: false,
-        quesOperation: false
+        quesOperation: false,
+        newQues: []
     };
 
     componentDidMount() {
@@ -145,21 +147,96 @@ export default class Phone extends PureComponent {
                 });
             }
         });
-
+    }
+    handleQues = () => {
 
     }
-    handleQues() {
-
+    handleQuesVisible = (flag) => {
+        this.setState({
+            quesVisible: !!flag,
+        });
     }
-    handleDelete() {
+    handleDelete = () => {
         notification.warn({
             message: '创手机后台提示您',
             description: '该功能还在开发中...',
         });
     }
+    handleAddNewQues = () => {
+        let {newQues} = this.state;
+        newQues.push({
+            problemName: "",
+            problemType: 1,
+            selects: [{
+                problemItem: "",
+                cost: ""
+            }]
+        });
+        this.setState({
+            newQues
+        })
+        console.log(this.state)
+    }
+    handleAddNewQuesOpt = (ques) => {
+        ques.selects.push({
+            problemItem: "",
+            cost: ""
+        })
+    }
+
+    getQuesById = () => {
+        console.log("getQuesById")
+        let result;
+        this.state.newQues.forEach((ques, index) => {
+            console.log(ques)
+            result += (
+                <Panel header="123" key={index}>
+                    <FormItem
+                        labelCol={{ span: 5 }}
+                        wrapperCol={{ span: 15 }}
+                        label="问题"
+                    >
+                        <Input placeholder="请输入问题" value={ques.problemName} />
+                    </FormItem>
+                    <FormItem
+                        labelCol={{ span: 5 }}
+                        wrapperCol={{ span: 15 }}
+                        label="类型"
+                    >
+                        <RadioGroup value={ques.problemType}>
+                            <Radio value={1}>单选</Radio>
+                            <Radio value={0}>多选</Radio>
+                        </RadioGroup>
+                    </FormItem>
+                    {
+                        ques.selects.forEach((item) => {
+                            <FormItem
+                                labelCol={{ span: 5 }}
+                                wrapperCol={{ span: 15 }}
+                                label="选项"
+                            >
+                            <Input placeholder="选项描述" value={item.problemItem} />
+                            <Input placeholder="选项折扣" value={item.cost} />
+                            </FormItem>
+                        })
+                    }
+                    <Button onClick={this.handleAddNewQuesOpt(ques)}>新增问题</Button>
+                </Panel>
+            )
+        })
+        return (
+            <div>
+                <Collapse defaultActiveKey={['1']}>
+                    {result}
+                </Collapse>
+                <Button type="primary" onClick={this.handleAddNewQues}>新增问题</Button>
+            </div>
+        );
+    }
 
     render() {
-        const { recycle: { loading, data }, brands } = this.props;
+        console.log("render")
+        const { recycle: { loading, data }, brands = [] } = this.props;
         const { modalVisible, addPhone, operation, quesVisible, quesOperation } = this.state;
         const okOrNo = {
             0: <Icon type="close" />,
@@ -180,7 +257,6 @@ export default class Phone extends PureComponent {
                             result = item.brandName
                         }
                     })
-                    console.log(val)
                     return result;
                 }
             },
@@ -194,7 +270,7 @@ export default class Phone extends PureComponent {
             },
             {
                 title: '图片',
-                dataIndex: 'url',
+                dataIndex: 'picUrl',
                 render: val => (
                     val ? <img src={val.indexOf('http') == 0 ? val : 'http://' + val} style={{ height: 60 }} /> : '无图片'
                 ),
@@ -215,7 +291,7 @@ export default class Phone extends PureComponent {
             }, {
                 title: '问题',
                 render: val => {
-                    let result = <Button type="normal" onClick={this.handleQues}>编辑</Button>;
+                    let result = <Button type="normal" onClick={this.handleQuesVisible}>编辑</Button>;
                     return result;
                 }
             }, {
@@ -235,11 +311,13 @@ export default class Phone extends PureComponent {
             <PageHeaderLayout title="热门回收手机管理">
                 <Card bordered={false}>
                     <div className={styles.tableList}>
+                        <div className={styles.tableListForm}>
+                            <FormItem label="品牌筛选">
+                                <Select style={{ width: 120 }} defaultValue={'1'} onChange={this.handleGetPhones} >{brandOpts}</Select>
+                            </FormItem>
+                        </div>
                         <div className={styles.tableListOperator}>
                             <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>新建</Button>
-                            <div style={{ margin: "20px 0" }}>
-                                <Select style={{ width: 120 }} defaultValue={'1'} onChange={this.handleGetPhones} >{brandOpts}</Select>
-                            </div>
                         </div>
                         <Table
                             rowKey={record => record.id}
@@ -255,7 +333,8 @@ export default class Phone extends PureComponent {
                     onCancel={() => this.handleQuesVisible()}
                     confirmLoading={quesOperation}
                 >
-
+                    {quesVisible}
+                    {this.getQuesById()}
                 </Modal>
                 <Modal
                     title="添加"
@@ -278,7 +357,7 @@ export default class Phone extends PureComponent {
                     >
                         <Input placeholder="请输入手机型号" value={addPhone.name} onChange={this.handleName} />
                     </FormItem>
-                    
+
                     <RadioGroup onChange={this.onChangeIsUseRecycle} value={addPhone.isUseRecycle}>
                         <Radio value={1}>是</Radio>
                         <Radio value={0}>否</Radio>
