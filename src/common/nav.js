@@ -31,12 +31,10 @@ export const getNavData = app => [
         path: 'recycle',
         children: [{
           name: '手机管理',
-          icon: 'mobile',
           path: 'phone',
           component: dynamicWrapper(app, ['brand','recycle'], () => import('../routes/recycle/RecyclePhone')),
         },{
           name: '订单管理',
-          icon: 'mobile',
           path: 'order',
           component: dynamicWrapper(app, ['brand','recycle'], () => import('../routes/recycle/RecyclePhone')),
         }],
@@ -46,12 +44,10 @@ export const getNavData = app => [
         path: 'repair',
         children: [{
           name: '手机管理',
-          icon: 'mobile',
           path: 'phone',
           component: dynamicWrapper(app, ['brand','recycle'], () => import('../routes/recycle/RecyclePhone')),
         },{
           name: '订单管理',
-          icon: 'mobile',
           path: 'order',
           component: dynamicWrapper(app, ['brand','recycle'], () => import('../routes/recycle/RecyclePhone')),
         }],

@@ -1,4 +1,4 @@
-import { getRecyclesByBrand, addRecyclePhone } from '../services/recycle';
+import { getRecyclesByBrand, addRecyclePhone, getRecycleProblems } from '../services/recycle';
 
 export default {
     namespace: 'recycle',
@@ -30,6 +30,19 @@ export default {
                 payload: true,
             });
             const response = yield call(addRecyclePhone, payload);
+            yield put({
+                type: 'changeLoading',
+                payload: false,
+            });
+
+            if (callback) callback();
+        },
+        *problems({ payload, callback }, { call, put }) {
+            yield put({
+                type: 'changeLoading',
+                payload: true,
+            });
+            const response = yield call(getRecycleProblems, payload);
             yield put({
                 type: 'changeLoading',
                 payload: false,

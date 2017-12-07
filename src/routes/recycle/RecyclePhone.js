@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Row, Col, Card, Collapse, Form, Input, Select, Icon, Button, InputNumber, Table, Modal, Spin, message, notification, Radio } from 'antd';
+import { Row, Col, Card, Collapse, Form, Input, Select,Upload, Icon, Button, InputNumber, Table, Modal, Spin, message, notification, Radio } from 'antd';
 import StandardTable from '../../components/StandardTable';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
@@ -18,7 +18,7 @@ const getValue = obj => Object.keys(obj).map(key => obj[key]).join(',');
     brands: state.brand.data
 }))
 @Form.create()
-export default class Phone extends PureComponent {
+export default class RecyclePhone extends PureComponent {
     state = {
         addPhone: {
             name: '',
@@ -32,7 +32,14 @@ export default class Phone extends PureComponent {
         operation: false,
         quesVisible: false,
         quesOperation: false,
-        newQues: []
+        newQues: [{
+            problemName: "",
+            problemType: 1,
+            selects: [{
+                problemItem: "",
+                cost: ""
+            }]
+        }]
     };
 
     componentDidMount() {
@@ -65,49 +72,43 @@ export default class Phone extends PureComponent {
         });
     }
     handleName = (e) => {
-        let { addPhone } = this.state;
-        addPhone.name = e.target.value;
+        let addPhone = Object.assign({},this.state.addPhone,{ name: e.target.value }) 
         this.setState({
-            addPhone: addPhone
+            addPhone
         });
     }
     onChangeIsUseRecycle = (e) => {
-        let { addPhone } = this.state;
-        addPhone.isUseRecycle = e.target.value;
+        let addPhone = Object.assign({},this.state.addPhone,{ isUseRecycle: e.target.value }) 
         this.setState({
             addPhone: addPhone
         });
     }
     onChangeIsUseHotRecycle = (e) => {
-        let { addPhone } = this.state;
-        addPhone.isUseHotRecycle = e.target.value;
+        let addPhone = Object.assign({},this.state.addPhone,{ isUseHotRecycle: e.target.value }) 
         this.setState({
             addPhone: addPhone
         });
     }
     handleUrl = (e) => {
-        let { addPhone } = this.state;
-        addPhone.url = e.target.value;
+        let addPhone = Object.assign({},this.state.addPhone,{ url: e.target.value }) 
         this.setState({
             addPhone: addPhone
         });
     }
     handleModelId = (value) => {
-        let { addPhone } = this.state;
-        addPhone.modelId = e.target.value;
+        let addPhone = Object.assign({},this.state.addPhone,{ modelId: value }) 
         this.setState({
             addPhone: addPhone
         });
     }
     handleTotalPrice = (e) => {
-        let { addPhone } = this.state;
-        addPhone.totalPrice = e.target.value;
+        let addPhone = Object.assign({},this.state.addPhone,{ totalPrice: e.target.value }) 
         this.setState({
             addPhone: addPhone
         });
     }
     handleAdd = () => {
-        const { addPhone: { name, url, modelId, totalPrice } } = this.state;
+        const { addPhone: { name, url, modelId, totalPrice, isUseRecycle,isUseHotRecycle } } = this.state;
         if (modelId === "") {
             message.warn('请填写手机品牌！');
             return;
@@ -133,14 +134,15 @@ export default class Phone extends PureComponent {
                 name,
                 url,
                 totalPrice,
-                modelId
+                brandId:modelId,
+                isUseRecycle,
+                isUseHotRecycle,
             },
             callback: () => {
                 this.setState({
                     modalVisible: false,
                     operation: false
                 });
-                console.log("添加成功！");
                 message.success('添加成功');
                 this.props.dispatch({
                     type: 'recycle/hot',
@@ -148,8 +150,9 @@ export default class Phone extends PureComponent {
             }
         });
     }
-    handleQues = () => {
 
+    handleQues = () => {
+        console.log(this.newQues)
     }
     handleQuesVisible = (flag) => {
         this.setState({
@@ -163,7 +166,7 @@ export default class Phone extends PureComponent {
         });
     }
     handleAddNewQues = () => {
-        let {newQues} = this.state;
+        let newQues = Object.assign([],this.state.newQues);
         newQues.push({
             problemName: "",
             problemType: 1,
@@ -174,23 +177,24 @@ export default class Phone extends PureComponent {
         });
         this.setState({
             newQues
-        })
-        console.log(this.state)
+        });
     }
-    handleAddNewQuesOpt = (ques) => {
-        ques.selects.push({
+    handleAddNewQuesOpt = (index,e) => {
+        let newQues = Object.assign([],this.state.newQues);
+        newQues[index].selects.push({
             problemItem: "",
             cost: ""
         })
+        this.setState({
+            newQues
+        });
     }
 
     getQuesById = () => {
-        console.log("getQuesById")
-        let result;
+        let result = [];
         this.state.newQues.forEach((ques, index) => {
-            console.log(ques)
-            result += (
-                <Panel header="123" key={index}>
+            result.push (
+                <Panel header={ques.problemName === "" ? "问题描述" : ques.problemName} key={'ques'+index}>
                     <FormItem
                         labelCol={{ span: 5 }}
                         wrapperCol={{ span: 15 }}
@@ -209,33 +213,33 @@ export default class Phone extends PureComponent {
                         </RadioGroup>
                     </FormItem>
                     {
-                        ques.selects.forEach((item) => {
-                            <FormItem
+                        ques.selects.map((item,idx) => {
+                            return (<FormItem
                                 labelCol={{ span: 5 }}
                                 wrapperCol={{ span: 15 }}
-                                label="选项"
+                                label={"选项"+(idx+1)}
+                                key={idx}
                             >
-                            <Input placeholder="选项描述" value={item.problemItem} />
-                            <Input placeholder="选项折扣" value={item.cost} />
-                            </FormItem>
+                            <Input placeholder="选项描述" value={item.problemItem} style={{marginBottom:20}}/>
+                            <InputNumber placeholder="选项折扣" value={item.cost}/>
+                            </FormItem>)
                         })
                     }
-                    <Button onClick={this.handleAddNewQuesOpt(ques)}>新增问题</Button>
+                    <Button onClick={this.handleAddNewQuesOpt.bind(this,index)}>新增问题</Button>
                 </Panel>
             )
         })
         return (
             <div>
-                <Collapse defaultActiveKey={['1']}>
+                <Collapse defaultActiveKey={['ques0']}>
                     {result}
                 </Collapse>
-                <Button type="primary" onClick={this.handleAddNewQues}>新增问题</Button>
+                <Button style={{marginTop:20}} type="primary" onClick={this.handleAddNewQues}>新增问题</Button>
             </div>
         );
     }
 
     render() {
-        console.log("render")
         const { recycle: { loading, data }, brands = [] } = this.props;
         const { modalVisible, addPhone, operation, quesVisible, quesOperation } = this.state;
         const okOrNo = {
@@ -307,6 +311,17 @@ export default class Phone extends PureComponent {
             brandOpts.push(<Option key={"brand" + index} value={item.id + ""} >{item.brandName}</Option>)
         });
 
+        const uploadProps ={
+            accept:"image/*",
+            action: "//chuangshouji.com/cphone/phone/uploadFile/",
+            listType: 'picture',
+            defaultFileList: [],
+            className: 'upload-list-inline',
+            name: "productFile",
+            onChange: (file,fileList)=>{
+                console.log(file);
+            }
+        }
         return (
             <PageHeaderLayout title="热门回收手机管理">
                 <Card bordered={false}>
@@ -333,7 +348,6 @@ export default class Phone extends PureComponent {
                     onCancel={() => this.handleQuesVisible()}
                     confirmLoading={quesOperation}
                 >
-                    {quesVisible}
                     {this.getQuesById()}
                 </Modal>
                 <Modal
@@ -358,27 +372,47 @@ export default class Phone extends PureComponent {
                         <Input placeholder="请输入手机型号" value={addPhone.name} onChange={this.handleName} />
                     </FormItem>
 
-                    <RadioGroup onChange={this.onChangeIsUseRecycle} value={addPhone.isUseRecycle}>
-                        <Radio value={1}>是</Radio>
-                        <Radio value={0}>否</Radio>
-                    </RadioGroup>
+                    <FormItem
+                        labelCol={{ span: 5 }}
+                        wrapperCol={{ span: 15 }}
+                        label="可回收"
+                    >
+                        <RadioGroup onChange={this.onChangeIsUseRecycle} value={addPhone.isUseRecycle}>
+                            <Radio value={1}>是</Radio>
+                            <Radio value={0}>否</Radio>
+                        </RadioGroup>
+                    </FormItem>
+
+                    <FormItem
+                        labelCol={{ span: 5 }}
+                        wrapperCol={{ span: 15 }}
+                        label="是热门"
+                    >
                     <RadioGroup onChange={this.onChangeIsUseHotRecycle} value={addPhone.isUseHotRecycle}>
                         <Radio value={1}>是</Radio>
                         <Radio value={0}>否</Radio>
                     </RadioGroup>
+                    </FormItem>
                     <FormItem
                         labelCol={{ span: 5 }}
                         wrapperCol={{ span: 15 }}
                         label="图片地址"
                     >
                         <Input placeholder="请输入图片地址" value={addPhone.url} onChange={this.handleUrl} />
+                        <Upload {...uploadProps}>
+                            <Button>
+                                <Icon type="upload" />上传图片
+                            </Button>
+                        </Upload>
                     </FormItem>
                     <FormItem
                         labelCol={{ span: 5 }}
                         wrapperCol={{ span: 15 }}
                         label="最高回收价格"
                     >
-                        <InputNumber
+                        <Input
+                            addonBefore="￥"
+                            type={"number"}
                             defaultValue={1000}
                             placeholder="请输入回收价格" value={addPhone.totalPrice} onChange={this.handleTotalPrice} />
                     </FormItem>

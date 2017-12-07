@@ -4,7 +4,7 @@ import {DOMAIN} from '../common/constant';
 
 
 export async function getBrands() {
-  return request(DOMAIN+'/phone/getBrands');
+  return request(DOMAIN+'/phone/getBrands',{method: "GET"});
 }
 
 export async function addPhoneBrand(params) {

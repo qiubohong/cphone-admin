@@ -10,6 +10,10 @@ export async function addRecyclePhone(params) {
     return request(DOMAIN + `/recycle/addRecyclePhone?${stringify(params)}`);
 }
 
+export async function getRecycleProblems(phoneId) {
+    return request(DOMAIN + `recycle/getRecycleProblems/${phoneId}`);
+}
+
 export async function addHotRecycle2(params) {
     return request(DOMAIN + `/recycle/addHotRecycle?${stringify(params)}`);
 }
