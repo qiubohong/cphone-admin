@@ -152,7 +152,7 @@ export default class RecyclePhone extends PureComponent {
     }
 
     handleQues = () => {
-        console.log(this.newQues)
+        console.log(this.state.newQues)
     }
     handleQuesVisible = (flag) => {
         this.setState({
