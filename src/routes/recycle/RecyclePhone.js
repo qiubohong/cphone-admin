@@ -46,6 +46,10 @@ export default class RecyclePhone extends PureComponent {
         const { dispatch } = this.props;
         dispatch({
             type: 'brand/fetch',
+            payload:{
+                startIndex: 0,
+                pageSize:1000,
+            },
             callback: () => {
                 const { brands } = this.props;
                 if (!brands) {
@@ -308,7 +312,7 @@ export default class RecyclePhone extends PureComponent {
         ];
         let brandOpts = [];
         brands.forEach((item, index) => {
-            brandOpts.push(<Option key={"brand" + index} value={item.id + ""} >{item.brandName}</Option>)
+            brandOpts.push(<Option key={"brand" + index} value={item.id} >{item.brandName}</Option>)
         });
 
         const uploadProps ={
@@ -328,7 +332,7 @@ export default class RecyclePhone extends PureComponent {
                     <div className={styles.tableList}>
                         <div className={styles.tableListForm}>
                             <FormItem label="品牌筛选">
-                                <Select style={{ width: 120 }} defaultValue={'1'} onChange={this.handleGetPhones} >{brandOpts}</Select>
+                                <Select style={{ width: 120 }} defaultValue={1} onChange={this.handleGetPhones} >{brandOpts}</Select>
                             </FormItem>
                         </div>
                         <div className={styles.tableListOperator}>

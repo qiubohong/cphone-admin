@@ -2,15 +2,19 @@ import { stringify } from 'qs';
 import request from '../utils/request';
 import { DOMAIN } from '../common/constant';
 
-export async function getRecyclesByBrand(brandId) {
-    return request(DOMAIN + `/recycle/getRecyclePhones/${brandId}`);
+export async function count() {
+    return request(DOMAIN + `/admin/recycle/phone/queryList`);
 }
 
-export async function addRecyclePhone(params) {
-    return request(DOMAIN + `/recycle/addRecyclePhone?${stringify(params)}`);
+export async function query(params) {
+    return request(DOMAIN + `/admin/recycle/phone/queryList?${stringify(params)}`);
 }
 
-export async function getRecycleProblems(phoneId) {
+export async function add(params) {
+    return request(DOMAIN + `/admin/recycle/phone/add?${stringify(params)}`);
+}
+
+export async function update(phoneId) {
     return request(DOMAIN + `recycle/getRecycleProblems/${phoneId}`);
 }
 

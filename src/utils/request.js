@@ -28,12 +28,13 @@ export default function request(url, options) {
   const newOptions = { ...defaultOptions, ...options };
   if (newOptions.method === 'POST' || newOptions.method === 'PUT') {
     newOptions.headers = {
-      Accept: 'application/json',
-      'Content-Type': 'application/json; charset=utf-8',
+      'Accept': 'application/json', 
+      'Content-Type': 'application/json',
       ...newOptions.headers,
     };
     newOptions.body = JSON.stringify(newOptions.body);
   }
+  console.log(newOptions)
 
   return fetch(url, newOptions)
     .then(checkStatus)

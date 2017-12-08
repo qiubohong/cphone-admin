@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Row, Col, Card, Form, Input, Select, Icon, Button, InputNumber, Table, Modal,Spin , message } from 'antd';
+import { Popconfirm, Row, Col, Card, Form, Input, Select, Icon, Button, InputNumber, Table, Modal,Spin , message } from 'antd';
 import StandardTable from '../../components/StandardTable';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
@@ -24,14 +24,37 @@ export default class Brand extends PureComponent {
         expandForm: false,
         selectedRows: [],
         formValues: {},
-        operation: false
+        operation: false,
+        pagination:{
+            startIndex: 0,
+            pageSize: 100,
+            total: 0,
+            onChange: (page, pageSize)=>{
+                this.paginationChange(page,pageSize);
+            }
+        }
     };
 
     componentDidMount() {
+        this.initQuery();
+    }
+
+    initQuery(){
         const { dispatch } = this.props;
+        const {pagination:{startIndex, pageSize}} = this.state;
+        dispatch({
+            type: 'brand/count',
+        })
         dispatch({
             type: 'brand/fetch',
+            payload: {
+                startIndex,
+                pageSize,
+            }
         });
+    }
+    paginationChange(page, pageSize){
+        
     }
 
     handleModalVisible = (flag) => {
@@ -40,54 +63,94 @@ export default class Brand extends PureComponent {
         });
     }
     handleBrandName = (e) => {
-        let picUrl = this.state.addBrand.picUrl
+        let addBrand = Object.assign({},this.state.addBrand);
+        addBrand.brandName = e.target.value;
         this.setState({
-            addBrand: {
-                brandName: e.target.value,
-                picUrl
-            }
+            addBrand
         });
     }
     handlePicUrl = (e) => {
-        let brandName = this.state.addBrand.brandName
+        let addBrand = Object.assign({},this.state.addBrand);
+        addBrand.picUrl = e.target.value;
         this.setState({
-            addBrand: {
-                brandName,
-                picUrl: e.target.value
+            addBrand
+        });
+    }
+    afterAddOrUpdate(msg){
+        this.setState({
+            operation:false
+        })
+        message.success(msg);
+        this.setState({
+            modalVisible: false,
+        });
+        this.initQuery();
+        this.setState({
+            addBrand:{
+                picUrl:"",
+                brandName:""
             }
         });
     }
     handleAdd = () => {
-        const { addBrand: { brandName, picUrl } } = this.state;
+        const { addBrand} = this.state;
+        const {dispatch} = this.props;
         this.setState({
             operation:true
         })
+        if(addBrand.id){
+            dispatch({
+                type: 'brand/update',
+                payload: {
+                    ...addBrand
+                },
+                callback: (res) => {
+                    if(!res || !res.data){
+                        this.setState({
+                            operation:false
+                        })
+                        return;
+                    }
+                    this.afterAddOrUpdate("修改成功！")
+                }
+            });
+        }else{
+            dispatch({
+                type: 'brand/add',
+                payload: {
+                    ...addBrand
+                },
+                callback: () => {
+                    this.afterAddOrUpdate("添加成功！")
+                }
+            });
+        }
+    }
+
+    handleDel(phoneBrandId){
         this.props.dispatch({
-            type: 'brand/add',
-            payload: {
-                brandName,
-                url:picUrl,
+            type:"brand/del",
+            payload:{
+                phoneBrandId
             },
-            callback: () => {
-                this.setState({
-                    operation:false
-                })
-                message.success('添加成功');
-                this.setState({
-                    modalVisible: false,
-                });
-                this.props.dispatch({
-                    type: 'brand/fetch',
-                });
+            callback:()=>{
+                this.initQuery('删除成功！')
             }
-        });
+        })
+    }
 
-
+    handleEdit(record){
+        this.setState({
+            addBrand: {
+                ...record
+            }
+        })
+        this.handleModalVisible(true);
     }
 
     render() {
         const { brand: { loading, data } } = this.props;
-        const { selectedRows, modalVisible, addBrand, operation } = this.state;
+        const { selectedRows, modalVisible, addBrand, operation , pagination} = this.state;
         const columns = [
             {
                 title: '编号',
@@ -103,7 +166,19 @@ export default class Brand extends PureComponent {
                 render: val => (
                     val ? <img src={val.indexOf('http') == 0 ? val : 'http://' + val} style={{ height: 60 }} /> : '无图片'
                 ),
-            }
+            },{
+                title: '操作',
+                key: 'operation',
+                fixed: 'right',
+                width: 180,
+                render: (text, record) => (<div>
+                    <Button onClick={()=>this.handleEdit(record)}>编辑</Button>&nbsp;
+                    <Popconfirm title="确定删除？" onConfirm={() => this.handleDel(record.id)}>
+                        <Button type="danger">删除</Button>
+                    </Popconfirm>
+                    
+                </div>),
+            },
         ];
 
         return (
@@ -130,6 +205,7 @@ export default class Brand extends PureComponent {
                             loading={loading}
                             dataSource={data}
                             columns={columns}
+                            pagination={pagination}
                         />
                     </div>
                 </Card>
