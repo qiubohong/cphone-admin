@@ -11,14 +11,16 @@ const { Option } = Select;
 const getValue = obj => Object.keys(obj).map(key => obj[key]).join(',');
 
 @connect(state => ({
-    brand: state.brand,
+    customer: state.customer,
 }))
 @Form.create()
-export default class Brand extends PureComponent {
+export default class Customer extends PureComponent {
     state = {
-        addBrand: {
-            brandName: '',
-            picUrl: ''
+        addCustomer: {
+            number: '', 
+            wxOpenid: '', 
+            name: '', 
+            passwd: ''
         },
         modalVisible: false,
         expandForm: false,
@@ -33,7 +35,6 @@ export default class Brand extends PureComponent {
                 this.paginationChange(page,pageSize);
             }
         },
-        fileList:[]
     };
 
     componentDidMount() {
@@ -44,10 +45,10 @@ export default class Brand extends PureComponent {
         const { dispatch } = this.props;
         const {pagination:{startIndex, pageSize}} = this.state;
         dispatch({
-            type: 'brand/count',
+            type: 'customer/count',
         })
         dispatch({
-            type: 'brand/fetch',
+            type: 'customer/fetch',
             payload: {
                 startIndex,
                 pageSize,
@@ -63,18 +64,32 @@ export default class Brand extends PureComponent {
             modalVisible: !!flag,
         });
     }
-    handleBrandName = (e) => {
-        let addBrand = Object.assign({},this.state.addBrand);
-        addBrand.brandName = e.target.value;
+    handleName = (e) => {
+        let addCustomer = Object.assign({},this.state.addCustomer);
+        addCustomer.name = e.target.value;
         this.setState({
-            addBrand
+            addCustomer
         });
     }
-    handlePicUrl = (e) => {
-        let addBrand = Object.assign({},this.state.addBrand);
-        addBrand.picUrl = e.target.value;
+    handleNumber = (e) => {
+        let addCustomer = Object.assign({},this.state.addCustomer);
+        addCustomer.number = e.target.value;
         this.setState({
-            addBrand
+            addCustomer
+        });
+    }
+    handleWxOpenid = (e) => {
+        let addCustomer = Object.assign({},this.state.addCustomer);
+        addCustomer.wxOpenid = e.target.value;
+        this.setState({
+            addCustomer
+        });
+    }
+    handlePasswd = (e) => {
+        let addCustomer = Object.assign({},this.state.addCustomer);
+        addCustomer.passwd = e.target.value;
+        this.setState({
+            addCustomer
         });
     }
     afterAddOrUpdate(msg){
@@ -87,23 +102,25 @@ export default class Brand extends PureComponent {
         });
         this.initQuery();
         this.setState({
-            addBrand:{
-                picUrl:"",
-                brandName:""
+            addCustomer:{
+                number: '', 
+                wxOpenid: '', 
+                name: '', 
+                passwd: ''
             }
         });
     }
     handleAdd = () => {
-        const { addBrand} = this.state;
+        const { addCustomer} = this.state;
         const {dispatch} = this.props;
         this.setState({
             operation:true
         })
-        if(addBrand.id){
+        if(addCustomer.id){
             dispatch({
-                type: 'brand/update',
+                type: 'customer/update',
                 payload: {
-                    ...addBrand
+                    ...addCustomer
                 },
                 callback: (res) => {
                     if(!res || !res.data){
@@ -117,9 +134,9 @@ export default class Brand extends PureComponent {
             });
         }else{
             dispatch({
-                type: 'brand/add',
+                type: 'customer/add',
                 payload: {
-                    ...addBrand
+                    ...addCustomer
                 },
                 callback: () => {
                     this.afterAddOrUpdate("添加成功！")
@@ -128,11 +145,11 @@ export default class Brand extends PureComponent {
         }
     }
 
-    handleDel(phoneBrandId){
+    handleDel(customerId){
         this.props.dispatch({
-            type:"brand/del",
+            type:"customer/del",
             payload:{
-                phoneBrandId
+                customerId
             },
             callback:()=>{
                 this.initQuery('删除成功！')
@@ -142,7 +159,7 @@ export default class Brand extends PureComponent {
 
     handleEdit(record){
         this.setState({
-            addBrand: {
+            addCustomer: {
                 ...record
             }
         })
@@ -150,23 +167,28 @@ export default class Brand extends PureComponent {
     }
 
     render() {
-        const { brand: { loading, data } } = this.props;
-        const { selectedRows, modalVisible, addBrand, operation , pagination} = this.state;
+        const { customer: { loading, data } } = this.props;
+        const { modalVisible, addCustomer, operation , pagination} = this.state;
         const columns = [
             {
                 title: '编号',
                 dataIndex: 'id',
             },
             {
-                title: '名称',
-                dataIndex: 'brandName',
+                title: '客户名称',
+                dataIndex: 'name',
             },
             {
-                title: '图片',
-                dataIndex: 'picUrl',
-                render: val => (
-                    val ? <img src={val.indexOf('http') == 0 ? val : 'http://' + val} style={{ height: 60 }} /> : '无图片'
-                ),
+                title: '联系电话',
+                dataIndex: 'number'
+            },
+            {
+                title: '微信openid',
+                dataIndex: 'wxOpenid'
+            },
+            {
+                title: '用户密码',
+                dataIndex: 'passwd'
             },{
                 title: '操作',
                 key: 'operation',
@@ -182,52 +204,12 @@ export default class Brand extends PureComponent {
             },
         ];
 
-        const uploadProps ={
-            accept:"image/*",
-            action: "//chuangshouji.com/cphone/phone/uploadFile/",
-            listType: 'picture',
-            defaultFileList: [],
-            fileList: this.state.fileList,
-            className: 'upload-list-inline',
-            name: "productFile",
-            onChange: (res)=>{
-                let file = res.file;
-                let fileList = res.fileList;
-                fileList = fileList.slice(-1);
-                this.setState({ fileList });
-                if(file.status === "done" && file.response){
-                    let picUrl = file.response.data;
-                    let addBrand = Object.assign({},this.state.addBrand,{ picUrl }) 
-                    this.setState({
-                        addBrand
-                    });
-                }else if(file.status === "removed"){
-                    let addBrand = Object.assign({},this.state.addBrand,{ picUrl:"" }) 
-                    this.setState({
-                        addBrand
-                    });
-                }
-            }
-        }
-
         return (
-            <PageHeaderLayout title="手机品牌管理">
+            <PageHeaderLayout title="用户管理">
                 <Card bordered={false}>
                     <div className={styles.tableList}>
                         <div className={styles.tableListOperator}>
                             <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>新建</Button>
-                            {
-                                selectedRows.length > 0 && (
-                                    <span>
-                                        <Button>批量操作</Button>
-                                        <Dropdown overlay={menu}>
-                                            <Button>
-                                                更多操作 <Icon type="down" />
-                                            </Button>
-                                        </Dropdown>
-                                    </span>
-                                )
-                            }
                         </div>
                         <Table
                             rowKey={record => record.id}
@@ -239,7 +221,7 @@ export default class Brand extends PureComponent {
                     </div>
                 </Card>
                 <Modal
-                    title="添加新品牌"
+                    title="添加新用户"
                     visible={modalVisible}
                     onOk={this.handleAdd}
                     onCancel={() => this.handleModalVisible()}
@@ -248,21 +230,30 @@ export default class Brand extends PureComponent {
                     <FormItem
                         labelCol={{ span: 5 }}
                         wrapperCol={{ span: 15 }}
-                        label="品牌名称"
+                        label="用户昵称"
                     >
-                        <Input placeholder="请输入品牌名称" onChange={this.handleBrandName} value={addBrand.brandName} />
+                        <Input placeholder="请输入用户昵称" onChange={this.handleName} value={addCustomer.name} />
                     </FormItem>
                     <FormItem
                         labelCol={{ span: 5 }}
                         wrapperCol={{ span: 15 }}
-                        label="图片地址"
+                        label="联系方式"
                     >
-                        <Input style={{marginBottom:10}} placeholder="请输入图片地址" onChange={this.handlePicUrl} value={addBrand.picUrl} />
-                        <Upload {...uploadProps}>
-                            <Button>
-                                <Icon type="upload" />上传图片
-                            </Button>
-                        </Upload>
+                        <Input placeholder="请输入用户联系方式" onChange={this.handleNumber} value={addCustomer.number} />
+                    </FormItem>
+                    <FormItem
+                        labelCol={{ span: 5 }}
+                        wrapperCol={{ span: 15 }}
+                        label="微信openid"
+                    >
+                        <Input placeholder="请输入用户微信openid" onChange={this.handleWxOpenid} value={addCustomer.wxOpenid} />
+                    </FormItem>
+                    <FormItem
+                        labelCol={{ span: 5 }}
+                        wrapperCol={{ span: 15 }}
+                        label="用户密码"
+                    >
+                        <Input placeholder="请输入用户微信openid" onChange={this.handlePasswd} value={addCustomer.passwd} />
                     </FormItem>
                 </Modal>
             </PageHeaderLayout>

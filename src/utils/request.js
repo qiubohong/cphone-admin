@@ -23,7 +23,7 @@ function checkStatus(response) {
  */
 export default function request(url, options) {
   const defaultOptions = {
-    mode: 'cors', 
+    //mode: 'no-cors', 
   };
   const newOptions = { ...defaultOptions, ...options };
   if (newOptions.method === 'POST' || newOptions.method === 'PUT') {
@@ -34,8 +34,6 @@ export default function request(url, options) {
     };
     newOptions.body = JSON.stringify(newOptions.body);
   }
-  console.log(newOptions)
-
   return fetch(url, newOptions)
     .then(checkStatus)
     .then(response => response.json())

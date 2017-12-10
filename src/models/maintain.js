@@ -1,7 +1,9 @@
-import  * as brand  from '../services/brand';
+import { stringify } from 'qs';
+import request from '../utils/request';
+import {DOMAIN} from '../common/constant';import  * as maintain  from '../services/maintain';
 
 export default {
-    namespace: 'brand',
+    namespace: 'maintain',
 
     state: {
         data: [],
@@ -15,7 +17,7 @@ export default {
                 type:"changeLoading",
                 payload: true
             })
-            const response = yield call(brand.count, payload);
+            const response = yield call(maintain.count, payload);
             yield put({
                 type: 'saveCount',
                 payload: response.data,
@@ -31,7 +33,7 @@ export default {
                 type: 'changeLoading',
                 payload: true,
             });
-            const response = yield call(brand.query, payload);
+            const response = yield call(maintain.query, payload);
             yield put({
                 type: 'save',
                 payload: response.data,
@@ -47,7 +49,7 @@ export default {
                 type: 'changeLoading',
                 payload: true,
             });
-            const response = yield call(brand.add, payload);
+            const response = yield call(maintain.add, payload);
             yield put({
                 type: 'changeLoading',
                 payload: false,
@@ -61,7 +63,7 @@ export default {
                 type: 'changeLoading',
                 payload: true,
             });
-            const response = yield call(brand.update, payload);
+            const response = yield call(maintain.update, payload);
             yield put({
                 type: 'changeLoading',
                 payload: false,
@@ -73,7 +75,7 @@ export default {
                 type: 'changeLoading',
                 payload: true,
             });
-            const response = yield call(brand.del, payload);
+            const response = yield call(maintain.del, payload);
             yield put({
                 type: 'changeLoading',
                 payload: false,
@@ -102,3 +104,27 @@ export default {
         },
     },
 };
+
+
+export async function count() {
+  return request(DOMAIN+`/admin/maintain/phone/count`);
+}
+
+export async function query(params) {
+  return request(DOMAIN+`/admin/maintain/phone/queryList?${stringify(params)}`);
+}
+
+export async function add(params) {
+    return request(DOMAIN+`/admin/maintain/phone/add?${stringify(params)}`);
+}
+
+export async function update(params) {
+  return request(DOMAIN+`/admin/maintain/phone/update`,{method:"POST",body:params});
+}
+
+export async function del(params) {
+  return request(DOMAIN+`/admin/maintain/phone/delById?${stringify(params)}`);
+}
+
+
+

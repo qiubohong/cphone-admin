@@ -16,11 +16,6 @@ export const getNavData = app => [
     path: '/',
     children: [
       {
-        name: '查询表格',
-        icon: 'bars',
-        path: 'table-list',
-        component: dynamicWrapper(app, ['rule'], () => import('../routes/List/TableList')),
-      },{
         name: '品牌管理',
         icon: 'bars',
         path: 'brand',
@@ -45,12 +40,18 @@ export const getNavData = app => [
         children: [{
           name: '手机管理',
           path: 'phone',
-          component: dynamicWrapper(app, ['brand','recycle'], () => import('../routes/recycle/RecyclePhone')),
+          component: dynamicWrapper(app, ['brand','maintain'], () => import('../routes/maintain/MaintainPhone')),
         },{
           name: '订单管理',
           path: 'order',
           component: dynamicWrapper(app, ['brand','recycle'], () => import('../routes/recycle/RecyclePhone')),
         }],
+      },
+      {
+        name: '用户管理',
+        icon: 'user',
+        path: 'customer',
+        component: dynamicWrapper(app, ['customer'], () => import('../routes/customer/Customer')),
       },
     ],
   },

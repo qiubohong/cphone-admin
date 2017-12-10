@@ -1,7 +1,7 @@
-import  * as brand  from '../services/brand';
+import  * as customer  from '../services/customer';
 
 export default {
-    namespace: 'brand',
+    namespace: 'customer',
 
     state: {
         data: [],
@@ -15,7 +15,7 @@ export default {
                 type:"changeLoading",
                 payload: true
             })
-            const response = yield call(brand.count, payload);
+            const response = yield call(customer.count, payload);
             yield put({
                 type: 'saveCount',
                 payload: response.data,
@@ -31,7 +31,7 @@ export default {
                 type: 'changeLoading',
                 payload: true,
             });
-            const response = yield call(brand.query, payload);
+            const response = yield call(customer.query, payload);
             yield put({
                 type: 'save',
                 payload: response.data,
@@ -47,7 +47,7 @@ export default {
                 type: 'changeLoading',
                 payload: true,
             });
-            const response = yield call(brand.add, payload);
+            const response = yield call(customer.add, payload);
             yield put({
                 type: 'changeLoading',
                 payload: false,
@@ -61,7 +61,7 @@ export default {
                 type: 'changeLoading',
                 payload: true,
             });
-            const response = yield call(brand.update, payload);
+            const response = yield call(customer.update, payload);
             yield put({
                 type: 'changeLoading',
                 payload: false,
@@ -73,7 +73,7 @@ export default {
                 type: 'changeLoading',
                 payload: true,
             });
-            const response = yield call(brand.del, payload);
+            const response = yield call(customer.del, payload);
             yield put({
                 type: 'changeLoading',
                 payload: false,

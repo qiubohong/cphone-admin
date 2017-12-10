@@ -14,7 +14,7 @@ const RadioGroup = Radio.Group;
 const getValue = obj => Object.keys(obj).map(key => obj[key]).join(',');
 
 @connect(state => ({
-    recycle: state.recycle,
+    maintain: state.maintain,
     brands: state.brand.data
 }))
 @Form.create()
@@ -23,9 +23,7 @@ export default class RecyclePhone extends PureComponent {
         addPhone: {
             name: 'iphone6',
             picUrl: 'http://ww1.sinaimg.cn/bmiddle/7fa9a04fgy1fk9yle453xj20lu0ghwpe.jpg',
-            brandId: '',
-            totalPrice: '3000',
-            isHot: 1
+            brandId: ''
         },
         modalVisible: false,
         operation: false,
@@ -47,7 +45,7 @@ export default class RecyclePhone extends PureComponent {
             },
             callback: () => {
                 dispatch({
-                    type: 'recycle/query',
+                    type: 'maintain/query',
                     payload: {
                         startIndex:0,
                         pageSize:1000
@@ -64,18 +62,11 @@ export default class RecyclePhone extends PureComponent {
         });
         message.success(msg);
         this.props.dispatch({
-            type: 'recycle/query',
+            type: 'maintain/query',
             payload: {
                 startIndex:0,
                 pageSize:1000
             }
-        });
-    }
-
-    handleGetPhones = (val) => {
-        this.props.dispatch({
-            type: 'recycle/query',
-            payload: val
         });
     }
 
@@ -90,12 +81,6 @@ export default class RecyclePhone extends PureComponent {
             addPhone
         });
     }
-    onChangeIsHot = (e) => {
-        let addPhone = Object.assign({},this.state.addPhone,{ isHot: e.target.value }) 
-        this.setState({
-            addPhone: addPhone
-        });
-    }
     handlePicUrl = (e) => {
         let addPhone = Object.assign({},this.state.addPhone,{ picUrl: e.target.value }) 
         this.setState({
@@ -104,12 +89,6 @@ export default class RecyclePhone extends PureComponent {
     }
     handleBrandId = (value) => {
         let addPhone = Object.assign({},this.state.addPhone,{ brandId: value }) 
-        this.setState({
-            addPhone: addPhone
-        });
-    }
-    handleTotalPrice = (e) => {
-        let addPhone = Object.assign({},this.state.addPhone,{ totalPrice: e.target.value }) 
         this.setState({
             addPhone: addPhone
         });
@@ -124,10 +103,6 @@ export default class RecyclePhone extends PureComponent {
             message.warn('请填写手机型号！');
             return;
         }
-        if (addPhone.totalPrice === "") {
-            message.warn('请填写手机回收价格！');
-            return;
-        }
         if (addPhone.url === "") {
             message.warn('请填写手机图片地址！');
             return;
@@ -137,7 +112,7 @@ export default class RecyclePhone extends PureComponent {
         });
         if(addPhone.id){
             this.props.dispatch({
-                type: 'recycle/update',
+                type: 'maintain/update',
                 payload: {
                     ...addPhone
                 },
@@ -146,9 +121,7 @@ export default class RecyclePhone extends PureComponent {
                         addPhone:{
                             name: 'iphone6',
                             picUrl: 'http://ww1.sinaimg.cn/bmiddle/7fa9a04fgy1fk9yle453xj20lu0ghwpe.jpg',
-                            brandId: '',
-                            totalPrice: '3000',
-                            isHot: 1
+                            brandId: ''
                         }
                     })
                     this.initPhones('更新成功');
@@ -156,7 +129,7 @@ export default class RecyclePhone extends PureComponent {
             });
         }else{
             this.props.dispatch({
-                type: 'recycle/add',
+                type: 'maintain/add',
                 payload: {
                     ...addPhone
                 },
@@ -179,11 +152,11 @@ export default class RecyclePhone extends PureComponent {
             editPhoneId: id
         });
         this.props.dispatch({
-            type:"recycle/queryProblem",
+            type:"maintain/queryProblem",
             payload:{
                 pageSize: 100,
                 startIndex: 0,
-                recyclePhoneId: id
+                maintainPhoneId: id
             },
             callback: (res)=>{
                 this.setState({
@@ -265,11 +238,11 @@ export default class RecyclePhone extends PureComponent {
         this.handleModalVisible(true);
     }
 
-    handleDel(recyclePhoneId){
+    handleDel(maintainPhoneId){
         this.props.dispatch({
-            type: "recycle/del",
+            type: "maintain/del",
             payload:{
-                recyclePhoneId
+                maintainPhoneId
             },
             callback:()=>{
                 this.initPhones("删除成功!");
@@ -295,13 +268,13 @@ export default class RecyclePhone extends PureComponent {
             quesLoading: true
         });
         this.props.dispatch({
-            type: "recycle/delProblem",
+            type: "maintain/delProblem",
             payload:{
                 recycleProblemId: ques.id
             },
             callback:(res)=>{
                 this.props.dispatch({
-                    type:"recycle/queryProblem",
+                    type:"maintain/queryProblem",
                     payload:{
                         pageSize: 100,
                         startIndex: 0,
@@ -332,21 +305,19 @@ export default class RecyclePhone extends PureComponent {
     }
 
     handleSaveQues(index, ques){
-        let {newQues,editPhoneId} = this.state;
-        newQues[index].edit = false;
         this.setState({
-            quesLoading: true,
-            newQues
+            quesLoading: true
         });
+        let {newQues} = this.state;
         if(ques.id){
             this.props.dispatch({
-                type:"recycle/batchUpdateProblem",
-                urlParam:{
-                    phoneId: editPhoneId,
+                type: "maintain/updateProblem",
+                params1:{
+                    ...ques
                 },
-                bodyParam:[
-                    ...[ques]
-                ],
+                params2:{
+                    ...ques.selects
+                },
                 callback:(res)=>{
                     this.setState({
                         quesLoading: false
@@ -355,13 +326,13 @@ export default class RecyclePhone extends PureComponent {
             })
         }else{
             this.props.dispatch({
-                type:"recycle/batchAddProblem",
-                urlParam:{
-                    phoneId: editPhoneId,
+                type: "maintain/updateProblem",
+                params1:{
+                    ...ques
                 },
-                bodyParam:[
-                    ...[ques]
-                ],
+                params2:{
+                    ...ques.selects
+                },
                 callback:(res)=>{
                     this.setState({
                         quesLoading: false
@@ -370,9 +341,6 @@ export default class RecyclePhone extends PureComponent {
             })
         }
         //this.handleQuesEdit(index, false);
-    }
-
-    handleQues(){
     }
 
     getQuesById = () => {
@@ -421,12 +389,13 @@ export default class RecyclePhone extends PureComponent {
                             if (ques.edit) { 
                                 return (<div>
                                     <RadioGroup value={ques.problemType} onChange={(e)=>obj.handleQuesCon(e,'problemType', index, -1)}>
-                                        <Radio value={0}>单选</Radio>
-                                        <Radio value={1}>多选</Radio>
+                                        <Radio value={1}>单选</Radio>
+                                        <Radio value={0}>多选</Radio>
                                     </RadioGroup>
+                                    <Button type="danger" size="small" icon="close" shape="circle"></Button>
                                     </div>)
                             }else{
-                                return ques.problemType === 0 ? "单选" : "多选";
+                                return ques.problemType === 1 ? "单选" : "多选";
                             }
                         }(this)
                     )}
@@ -445,7 +414,6 @@ export default class RecyclePhone extends PureComponent {
                                 return (<div>
                                 <Input placeholder="选项描述" value={item.problemItem} style={{marginBottom:20}} onChange={(e)=>obj.handleQuesCon(e,'problemItem', -1, idx)}/>
                                 <Input placeholder="选项折扣" type="number" value={item.cost} onChange={(e)=>obj.handleQuesCon(e,'cost', -1, idx)} />
-                                <Button type="danger" size="small" icon="close" shape="circle"></Button>
                                 </div>)
                             }else{
                                 return (<div>
@@ -475,7 +443,7 @@ export default class RecyclePhone extends PureComponent {
     }
 
     render() {
-        const { recycle: { loading, data }, brands = [] } = this.props;
+        const { maintain: { loading, data }, brands = [] } = this.props;
         const { modalVisible, addPhone, operation, quesVisible, quesOperation } = this.state;
         const okOrNo = {
             0: <Icon type="close" />,
@@ -504,30 +472,12 @@ export default class RecyclePhone extends PureComponent {
                 dataIndex: 'name',
             },
             {
-                title: '最高回收价',
-                dataIndex: 'totalPrice',
-            },
-            {
                 title: '图片',
                 dataIndex: 'picUrl',
                 render: val => (
                     val ? <img src={val.indexOf('http') == 0 ? val : 'http://' + val} style={{ height: 60 }} /> : '无图片'
                 ),
-            },
-            {
-                title: '可回收?',
-                dataIndex: 'status',
-                render: val => (
-                    okOrNo[val]
-                ),
-            },
-            {
-                title: '是热门?',
-                dataIndex: 'isHot',
-                render: val => (
-                    okOrNo[val]
-                ),
-            }, {
+            },{
                 title: '问题',
                 render: (text,record) => {
                     let result = <Button type="normal" onClick={()=>this.handleQuesVisible(true,record.id)}>编辑</Button>;
@@ -579,7 +529,7 @@ export default class RecyclePhone extends PureComponent {
             }
         }
         return (
-            <PageHeaderLayout title="热门回收手机管理">
+            <PageHeaderLayout title="维修手机管理">
                 <Card bordered={false}>
                     <div className={styles.tableList}>
                         <div className={styles.tableListOperator}>
@@ -595,10 +545,9 @@ export default class RecyclePhone extends PureComponent {
                 </Card>
                 <Modal title="编辑问题"
                     visible={quesVisible}
-                    onOk={() => this.handleQues()}
+                    onOk={() => this.handleQuesVisible(false)}
                     onCancel={() => this.handleQuesVisible(false)}
                     confirmLoading={quesOperation}
-                    footer = {null}
                 >
                     <Spin spinning={this.state.quesLoading}>
                         {this.getQuesById()}
@@ -625,17 +574,6 @@ export default class RecyclePhone extends PureComponent {
                     >
                         <Input placeholder="请输入手机型号" value={addPhone.name} onChange={this.handleName} />
                     </FormItem>
-
-                    <FormItem
-                        labelCol={{ span: 5 }}
-                        wrapperCol={{ span: 15 }}
-                        label="是热门"
-                    >
-                    <RadioGroup onChange={this.onChangeIsHot} value={addPhone.isHot}>
-                        <Radio value={1}>是</Radio>
-                        <Radio value={0}>否</Radio>
-                    </RadioGroup>
-                    </FormItem>
                     <FormItem
                         labelCol={{ span: 5 }}
                         wrapperCol={{ span: 15 }}
@@ -647,17 +585,6 @@ export default class RecyclePhone extends PureComponent {
                                 <Icon type="upload" />上传图片
                             </Button>
                         </Upload>
-                    </FormItem>
-                    <FormItem
-                        labelCol={{ span: 5 }}
-                        wrapperCol={{ span: 15 }}
-                        label="最高回收价格"
-                    >
-                        <Input
-                            addonBefore="￥"
-                            type={"number"}
-                            defaultValue={1000}
-                            placeholder="请输入回收价格" value={addPhone.totalPrice} onChange={this.handleTotalPrice} />
                     </FormItem>
                 </Modal>
             </PageHeaderLayout>
