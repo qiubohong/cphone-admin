@@ -26,7 +26,7 @@ export default {
             });
 
         },
-        *fetch({ payload, callback=function(){}}, { call, put }) {
+        *fetch({ payload, callback}, { call, put }) {
             yield put({
                 type: 'changeLoading',
                 payload: true,
@@ -40,7 +40,7 @@ export default {
                 type: 'changeLoading',
                 payload: false,
             });
-            callback();
+            callback && callback();
         },
         *add({ payload, callback }, { call, put }) {
             yield put({

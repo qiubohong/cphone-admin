@@ -7,6 +7,7 @@ export async function count() {
 }
 
 export async function query(params) {
+  console.log(params)
   return request(DOMAIN+`/admin/maintain/phone/queryList?${stringify(params)}`);
 }
 
@@ -20,6 +21,22 @@ export async function update(params) {
 
 export async function del(params) {
   return request(DOMAIN+`/admin/maintain/phone/delById?${stringify(params)}`);
+}
+
+export async function queryProblem(params) {
+  return request(DOMAIN + `/admin/maintain/problem/queryList?${stringify(params)}`);
+}
+
+export async function delProblem(params) {
+  return request(DOMAIN + `/admin/maintain/problem/delById?${stringify(params)}`);
+}
+
+export async function batchAddProblem(urlParam, body){
+  return request(DOMAIN + `/admin/maintain/problem/batchAdd?${stringify(urlParam)}`,{method:"POST", body:body});
+}
+
+export async function batchUpdateProblem(urlParam, body){
+  return request(DOMAIN + `/admin/maintain/problem/batchUpdate?${stringify(urlParam)}`,{method:"POST", body:body});
 }
 
 

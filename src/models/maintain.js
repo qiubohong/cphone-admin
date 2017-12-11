@@ -28,7 +28,7 @@ export default {
             });
 
         },
-        *fetch({ payload, callback=function(){}}, { call, put }) {
+        *query({ payload, callback=function(){}}, { call, put }) {
             yield put({
                 type: 'changeLoading',
                 payload: true,
@@ -76,6 +76,55 @@ export default {
                 payload: true,
             });
             const response = yield call(maintain.del, payload);
+            yield put({
+                type: 'changeLoading',
+                payload: false,
+            });
+            callback(response);
+        },
+        *queryProblem({ payload, callback = function(){} }, { call, put }) {
+            yield put({
+                type: 'changeLoading',
+                payload: true,
+            });
+            const response = yield call(maintain.queryProblem, payload);
+            yield put({
+                type: 'changeLoading',
+                payload: false,
+            });
+            callback(response);
+        },
+        *delProblem({ payload, callback = function(){} }, { call, put }) {
+            yield put({
+                type: 'changeLoading',
+                payload: true,
+            });
+            const response = yield call(maintain.delProblem, payload);
+            yield put({
+                type: 'changeLoading',
+                payload: false,
+            });
+            callback(response);
+        },
+        *batchAddProblem({ urlParam, bodyParam, callback = function(){} }, { call, put }) {
+            yield put({
+                type: 'changeLoading',
+                payload: true,
+            });
+            console.log(urlParam)
+            const response = yield call(maintain.batchAddProblem, urlParam, bodyParam);
+            yield put({
+                type: 'changeLoading',
+                payload: false,
+            });
+            callback(response);
+        },
+        *batchUpdateProblem({ urlParam, bodyParam, callback = function(){} }, { call, put }) {
+            yield put({
+                type: 'changeLoading',
+                payload: true,
+            });
+            const response = yield call(maintain.batchUpdateProblem, urlParam, bodyParam);
             yield put({
                 type: 'changeLoading',
                 payload: false,

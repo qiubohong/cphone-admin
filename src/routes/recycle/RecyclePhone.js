@@ -227,9 +227,10 @@ export default class RecyclePhone extends PureComponent {
             newQues
         });
     }
-    handleAddNewQuesOpt = (index,e) => {
+    handleAddNewQuesOpt = (index, problemId,e) => {
         let newQues = Object.assign([],this.state.newQues);
         newQues[index].selects.push({
+            problemId,
             problemItem: "",
             cost: ""
         })
@@ -369,7 +370,6 @@ export default class RecyclePhone extends PureComponent {
                 }
             })
         }
-        //this.handleQuesEdit(index, false);
     }
 
     handleQues(){
@@ -460,7 +460,7 @@ export default class RecyclePhone extends PureComponent {
                                 </FormItem>)
                             })
                     }
-                    <Button onClick={this.handleAddNewQuesOpt.bind(this,index)}>新增问题</Button>
+                    <Button onClick={this.handleAddNewQuesOpt.bind(this,index,ques.id)}>新增问题</Button>
                 </Panel>
             )
         })

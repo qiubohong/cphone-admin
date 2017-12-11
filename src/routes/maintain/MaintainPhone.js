@@ -18,7 +18,7 @@ const getValue = obj => Object.keys(obj).map(key => obj[key]).join(',');
     brands: state.brand.data
 }))
 @Form.create()
-export default class RecyclePhone extends PureComponent {
+export default class MaintainPhone extends PureComponent {
     state = {
         addPhone: {
             name: 'iphone6',
@@ -270,7 +270,7 @@ export default class RecyclePhone extends PureComponent {
         this.props.dispatch({
             type: "maintain/delProblem",
             payload:{
-                recycleProblemId: ques.id
+                maintainProblemId: ques.id
             },
             callback:(res)=>{
                 this.props.dispatch({
@@ -305,19 +305,21 @@ export default class RecyclePhone extends PureComponent {
     }
 
     handleSaveQues(index, ques){
+        let {newQues,editPhoneId} = this.state;
+        newQues[index].edit = false;
         this.setState({
-            quesLoading: true
+            quesLoading: true,
+            newQues
         });
-        let {newQues} = this.state;
         if(ques.id){
             this.props.dispatch({
-                type: "maintain/updateProblem",
-                params1:{
-                    ...ques
+                type:"maintain/batchUpdateProblem",
+                urlParam:{
+                    phoneId: editPhoneId,
                 },
-                params2:{
-                    ...ques.selects
-                },
+                bodyParam:[
+                    ...[ques]
+                ],
                 callback:(res)=>{
                     this.setState({
                         quesLoading: false
@@ -326,13 +328,13 @@ export default class RecyclePhone extends PureComponent {
             })
         }else{
             this.props.dispatch({
-                type: "maintain/updateProblem",
-                params1:{
-                    ...ques
+                type:"maintain/batchAddProblem",
+                urlParam:{
+                    phoneId: editPhoneId,
                 },
-                params2:{
-                    ...ques.selects
-                },
+                bodyParam:[
+                    ...[ques]
+                ],
                 callback:(res)=>{
                     this.setState({
                         quesLoading: false
@@ -340,14 +342,13 @@ export default class RecyclePhone extends PureComponent {
                 }
             })
         }
-        //this.handleQuesEdit(index, false);
     }
 
     getQuesById = () => {
         let result = [];
         this.state.newQues.forEach((ques, index) => {
             result.push (
-                <Panel header={ques.problemName === "" ? "问题描述" : ques.problemName} key={'ques'+index}>
+                <Panel header={ques.problemName === "" ? "故障描述" : ques.problemName} key={'ques'+index}>
                     {(
                         function(obj){
                             if (!ques.edit) { 
@@ -368,11 +369,11 @@ export default class RecyclePhone extends PureComponent {
                     <FormItem
                         labelCol={{ span: 5 }}
                         wrapperCol={{ span: 15 }}
-                        label="问题"
+                        label="故障标题"
                     >{(
                         function(obj){
                             if (ques.edit) { 
-                                return <Input placeholder="请输入问题" value={ques.problemName} onChange={(e)=>obj.handleQuesCon(e,'problemName', index, -1)} />
+                                return <Input placeholder="请输入故障标题" value={ques.problemName} onChange={(e)=>obj.handleQuesCon(e,'problemName', index, -1)} />
                             }else{
                                 return ques.problemName;
                             }
@@ -478,7 +479,7 @@ export default class RecyclePhone extends PureComponent {
                     val ? <img src={val.indexOf('http') == 0 ? val : 'http://' + val} style={{ height: 60 }} /> : '无图片'
                 ),
             },{
-                title: '问题',
+                title: '可维修故障',
                 render: (text,record) => {
                     let result = <Button type="normal" onClick={()=>this.handleQuesVisible(true,record.id)}>编辑</Button>;
                     return result;
@@ -548,6 +549,7 @@ export default class RecyclePhone extends PureComponent {
                     onOk={() => this.handleQuesVisible(false)}
                     onCancel={() => this.handleQuesVisible(false)}
                     confirmLoading={quesOperation}
+                    footer = {null}
                 >
                     <Spin spinning={this.state.quesLoading}>
                         {this.getQuesById()}
