@@ -101,6 +101,5 @@
       "\\.(css|less)$": "<rootDir>/tests/styleMock.js"
     }
   },
-  "lint-staged": {
-  }
+  "lint-staged": {}
 }

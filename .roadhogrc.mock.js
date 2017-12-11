@@ -2,15 +2,17 @@ import mockjs from 'mockjs';
 import { getRule, postRule } from './mock/rule';
 import { imgMap } from './mock/utils';
 import { getNotices } from './mock/notices';
-import { getBrands } from './mock/brand';
-import { getRecycle } from './mock/recycle';
 import { delay } from 'roadhog-api-doc';
+
+import { proxyGet,proxyPost } from './mock/proxy';
 
 // 是否禁用代理
 const noProxy = process.env.NO_PROXY === 'true';
 
 // 代码中会兼容本地 service mock 以及部署站点的静态数据
 const proxy = {
+  'GET /cphone/admin/*': proxyGet,
+  'POST /cphone/admin/*': proxyPost,
   // 支持值为 Object 和 Array
   'GET /api/currentUser': {
     $desc: "获取当前用户接口",
@@ -53,11 +55,7 @@ const proxy = {
       },
     },
     $body: postRule,
-  },
-  'GET /api/notices': getNotices,
-  'GET /phone/getBrands' : getBrands,
-  'GET /recycle/getRecyclePhones/*' : getRecycle,
-
+  }
 };
 
-export default noProxy ? {} : delay(proxy, 1000);
+export default noProxy ? {} : delay(proxy, 100);
