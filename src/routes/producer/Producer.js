@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import {Upload, Popconfirm, Row, Col, Card, Form, Input, Select, Icon, Button, InputNumber, Table, Modal,Spin , message } from 'antd';
+import {Radio,  Popconfirm, Row, Col, Card, Form, Input, Select, Icon, Button, InputNumber, Table, Modal,Spin , message } from 'antd';
 import StandardTable from '../../components/StandardTable';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
@@ -8,24 +8,23 @@ import styles from '../Table.less';
 
 const FormItem = Form.Item;
 const { Option } = Select;
+const RadioGroup = Radio.Group;
 const getValue = obj => Object.keys(obj).map(key => obj[key]).join(',');
 
 @connect(state => ({
-    customer: state.customer,
+    producer: state.producer,
 }))
 @Form.create()
 export default class Producer extends PureComponent {
     state = {
-        addCustomer: {
+        addProducer: {
             number: '', 
-            wxOpenid: '', 
-            name: '', 
+            role: 0, 
+            bussiness: 0, 
+            name:'',
             passwd: ''
         },
         modalVisible: false,
-        expandForm: false,
-        selectedRows: [],
-        formValues: {},
         operation: false,
         pagination:{
             startIndex: 0,
@@ -45,10 +44,10 @@ export default class Producer extends PureComponent {
         const { dispatch } = this.props;
         const {pagination:{startIndex, pageSize}} = this.state;
         dispatch({
-            type: 'customer/count',
+            type: 'producer/count',
         })
         dispatch({
-            type: 'customer/fetch',
+            type: 'producer/fetch',
             payload: {
                 startIndex,
                 pageSize,
@@ -65,31 +64,38 @@ export default class Producer extends PureComponent {
         });
     }
     handleName = (e) => {
-        let addCustomer = Object.assign({},this.state.addCustomer);
-        addCustomer.name = e.target.value;
+        let addProducer = Object.assign({},this.state.addProducer);
+        addProducer.name = e.target.value;
         this.setState({
-            addCustomer
+            addProducer
         });
     }
     handleNumber = (e) => {
-        let addCustomer = Object.assign({},this.state.addCustomer);
-        addCustomer.number = e.target.value;
+        let addProducer = Object.assign({},this.state.addProducer);
+        addProducer.number = e.target.value;
         this.setState({
-            addCustomer
-        });
-    }
-    handleWxOpenid = (e) => {
-        let addCustomer = Object.assign({},this.state.addCustomer);
-        addCustomer.wxOpenid = e.target.value;
-        this.setState({
-            addCustomer
+            addProducer
         });
     }
     handlePasswd = (e) => {
-        let addCustomer = Object.assign({},this.state.addCustomer);
-        addCustomer.passwd = e.target.value;
+        let addProducer = Object.assign({},this.state.addProducer);
+        addProducer.passwd = e.target.value;
         this.setState({
-            addCustomer
+            addProducer
+        });
+    }
+    handleBussiness = (e) => {
+        let addProducer = Object.assign({},this.state.addProducer);
+        addProducer.bussiness = e.target.value;
+        this.setState({
+            addProducer
+        });
+    }
+    handleRole = (e) => {
+        let addProducer = Object.assign({},this.state.addProducer);
+        addProducer.role = e.target.value;
+        this.setState({
+            addProducer
         });
     }
     afterAddOrUpdate(msg){
@@ -102,25 +108,26 @@ export default class Producer extends PureComponent {
         });
         this.initQuery();
         this.setState({
-            addCustomer:{
+            addProducer:{
                 number: '', 
-                wxOpenid: '', 
-                name: '', 
+                role: '', 
+                bussiness: '', 
+                name:'',
                 passwd: ''
             }
         });
     }
     handleAdd = () => {
-        const { addCustomer} = this.state;
+        const { addProducer} = this.state;
         const {dispatch} = this.props;
         this.setState({
             operation:true
         })
-        if(addCustomer.id){
+        if(addProducer.id){
             dispatch({
-                type: 'customer/update',
+                type: 'producer/update',
                 payload: {
-                    ...addCustomer
+                    ...addProducer
                 },
                 callback: (res) => {
                     if(!res || !res.data){
@@ -134,9 +141,9 @@ export default class Producer extends PureComponent {
             });
         }else{
             dispatch({
-                type: 'customer/add',
+                type: 'producer/add',
                 payload: {
-                    ...addCustomer
+                    ...addProducer
                 },
                 callback: () => {
                     this.afterAddOrUpdate("添加成功！")
@@ -145,11 +152,11 @@ export default class Producer extends PureComponent {
         }
     }
 
-    handleDel(customerId){
+    handleDel(producerId){
         this.props.dispatch({
-            type:"customer/del",
+            type:"producer/del",
             payload:{
-                customerId
+                producerId
             },
             callback:()=>{
                 this.initQuery('删除成功！')
@@ -159,7 +166,7 @@ export default class Producer extends PureComponent {
 
     handleEdit(record){
         this.setState({
-            addCustomer: {
+            addProducer: {
                 ...record
             }
         })
@@ -167,8 +174,20 @@ export default class Producer extends PureComponent {
     }
 
     render() {
-        const { customer: { loading, data } } = this.props;
-        const { modalVisible, addCustomer, operation , pagination} = this.state;
+        const { producer: { loading, data } } = this.props;
+        const { modalVisible, addProducer, operation , pagination} = this.state;
+        //业务：0所有，1维修， 2回收
+        const bussiness = {
+            0:"所有",
+            1:"维修",
+            2:"回收"
+        };
+        //0所有，1上门，2门店
+        const role = {
+            0:"所有",
+            1:"上门",
+            2:"门店"
+        };
         const columns = [
             {
                 title: '编号',
@@ -184,11 +203,17 @@ export default class Producer extends PureComponent {
             },
             {
                 title: '业务',
-                dataIndex: 'wxOpenid'
+                dataIndex: 'bussiness',
+                render:(val)=>{
+                    return bussiness[val]
+                }
             },
             {
                 title: '角色',
-                dataIndex: 'wxOpenid'
+                dataIndex: 'role',
+                render:(val)=>{
+                    return role[val]
+                }
             },
             {
                 title: '用户密码',
@@ -236,28 +261,43 @@ export default class Producer extends PureComponent {
                         wrapperCol={{ span: 15 }}
                         label="用户昵称"
                     >
-                        <Input placeholder="请输入用户昵称" onChange={this.handleName} value={addCustomer.name} />
+                        <Input placeholder="请输入用户昵称" onChange={this.handleName} value={addProducer.name} />
                     </FormItem>
                     <FormItem
                         labelCol={{ span: 5 }}
                         wrapperCol={{ span: 15 }}
                         label="联系方式"
                     >
-                        <Input placeholder="请输入用户联系方式" onChange={this.handleNumber} value={addCustomer.number} />
-                    </FormItem>
-                    <FormItem
-                        labelCol={{ span: 5 }}
-                        wrapperCol={{ span: 15 }}
-                        label="微信openid"
-                    >
-                        <Input placeholder="请输入用户微信openid" onChange={this.handleWxOpenid} value={addCustomer.wxOpenid} />
+                        <Input placeholder="请输入用户联系方式" onChange={this.handleNumber} value={addProducer.number} />
                     </FormItem>
                     <FormItem
                         labelCol={{ span: 5 }}
                         wrapperCol={{ span: 15 }}
                         label="用户密码"
                     >
-                        <Input placeholder="请输入用户微信openid" onChange={this.handlePasswd} value={addCustomer.passwd} />
+                        <Input placeholder="请输入用户密码" onChange={this.handlePasswd} value={addProducer.passwd} />
+                    </FormItem>
+                    <FormItem
+                        labelCol={{ span: 5 }}
+                        wrapperCol={{ span: 15 }}
+                        label="服务角色"
+                    >
+                        <RadioGroup onChange={this.handleRole} value={addProducer.role}>
+                            <Radio value={0}>{role["0"]}</Radio>
+                            <Radio value={1}>{role["1"]}</Radio>
+                            <Radio value={2}>{role["2"]}</Radio>
+                        </RadioGroup>
+                    </FormItem>
+                    <FormItem
+                        labelCol={{ span: 5 }}
+                        wrapperCol={{ span: 15 }}
+                        label="业务范围"
+                    >
+                        <RadioGroup onChange={this.handleBussiness} value={addProducer.bussiness}>
+                            <Radio value={0}>{bussiness["0"]}</Radio>
+                            <Radio value={1}>{bussiness["1"]}</Radio>
+                            <Radio value={2}>{bussiness["2"]}</Radio>
+                        </RadioGroup>
                     </FormItem>
                 </Modal>
             </PageHeaderLayout>

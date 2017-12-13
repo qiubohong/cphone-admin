@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Popconfirm,Row, Col, Card, Collapse, Form, Input, Select,Upload, Icon, Button, InputNumber, Table, Modal, Spin, message, notification, Radio } from 'antd';
+import {Switch, Popconfirm,Row, Col, Card, Collapse, Form, Input, Select,Upload, Icon, Button, InputNumber, Table, Modal, Spin, message, notification, Radio } from 'antd';
 import StandardTable from '../../components/StandardTable';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
@@ -203,6 +203,7 @@ export default class MaintainPhone extends PureComponent {
     handleAddNewQuesOpt = (index,e) => {
         let newQues = Object.assign([],this.state.newQues);
         newQues[index].selects.push({
+            problemId: newQues[index].id,
             problemItem: "",
             cost: ""
         })
@@ -344,6 +345,27 @@ export default class MaintainPhone extends PureComponent {
         }
     }
 
+    onSwitchChange (checked,record){
+        let addPhone = record;
+        addPhone.status = checked ? 1: 0;
+        this.props.dispatch({
+            type: 'maintain/update',
+            payload: {
+                ...addPhone
+            },
+            callback: () => {
+                this.setState({
+                    addPhone:{
+                        name: 'iphone6',
+                        picUrl: 'http://ww1.sinaimg.cn/bmiddle/7fa9a04fgy1fk9yle453xj20lu0ghwpe.jpg',
+                        brandId: ''
+                    }
+                })
+                this.initPhones('更新成功');
+            }
+        });
+    }
+
     getQuesById = () => {
         let result = [];
         this.state.newQues.forEach((ques, index) => {
@@ -446,10 +468,6 @@ export default class MaintainPhone extends PureComponent {
     render() {
         const { maintain: { loading, data }, brands = [] } = this.props;
         const { modalVisible, addPhone, operation, quesVisible, quesOperation } = this.state;
-        const okOrNo = {
-            0: <Icon type="close" />,
-            1: <Icon type="check" />
-        }
         const columns = [
             {
                 title: "编号",
@@ -478,6 +496,13 @@ export default class MaintainPhone extends PureComponent {
                 render: val => (
                     val ? <img src={val.indexOf('http') == 0 ? val : 'http://' + val} style={{ height: 60 }} /> : '无图片'
                 ),
+            },
+            {
+                title: '上架?',
+                dataIndex: 'status',
+                render: (val,record) =>{ 
+                    return  <Switch checked={val == 1} onChange={(checked)=>{this.onSwitchChange(checked,record)}} />
+                },
             },{
                 title: '可维修故障',
                 render: (text,record) => {
