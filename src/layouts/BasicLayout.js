@@ -67,9 +67,9 @@ class BasicLayout extends React.PureComponent {
     return { location, breadcrumbNameMap };
   }
   componentDidMount() {
-    this.props.dispatch({
+    /*this.props.dispatch({
       type: 'user/fetchCurrent',
-    });
+    });*/
   }
   componentWillUnmount() {
     clearTimeout(this.resizeTimeout);
@@ -198,27 +198,17 @@ class BasicLayout extends React.PureComponent {
       window.dispatchEvent(event);
     }, 600);
   }
-  handleNoticeClear = (type) => {
-    message.success(`清空了${type}`);
-    this.props.dispatch({
-      type: 'global/clearNotices',
-      payload: type,
-    });
-  }
-  handleNoticeVisibleChange = (visible) => {
-    if (visible) {
-      this.props.dispatch({
-        type: 'global/fetchNotices',
-      });
-    }
-  }
   render() {
-    const { currentUser, collapsed, fetchingNotices, getRouteData } = this.props;
-
+    const { collapsed, fetchingNotices, getRouteData } = this.props;
+    const currentUser ={
+      name: '后台管理员',
+      avatar: 'https://gw.alipayobjects.com/zos/rmsportal/dRFVcIqZOYPcSNrlJsqQ.png',
+      userid: '00000001',
+      notifyCount: 12,
+    };
     const menu = (
       <Menu className={styles.menu} selectedKeys={[]} onClick={this.onMenuClick}>
         <Menu.Item disabled><Icon type="user" />个人中心</Menu.Item>
-        <Menu.Item disabled><Icon type="setting" />设置</Menu.Item>
         <Menu.Divider />
         <Menu.Item key="logout"><Icon type="logout" />退出登录</Menu.Item>
       </Menu>
@@ -265,17 +255,6 @@ class BasicLayout extends React.PureComponent {
               onClick={this.toggle}
             />
             <div className={styles.right}>
-              <HeaderSearch
-                className={`${styles.action} ${styles.search}`}
-                placeholder="站内搜索"
-                dataSource={['搜索提示一', '搜索提示二', '搜索提示三']}
-                onSearch={(value) => {
-                  console.log('input', value); // eslint-disable-line
-                }}
-                onPressEnter={(value) => {
-                  console.log('enter', value); // eslint-disable-line
-                }}
-              />
               {currentUser.name ? (
                 <Dropdown overlay={menu}>
                   <span className={`${styles.action} ${styles.account}`}>

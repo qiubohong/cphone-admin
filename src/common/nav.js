@@ -62,6 +62,11 @@ export const getNavData = app => [
             name:"工作人员",
             path: 'producer',
             component: dynamicWrapper(app, ['producer'], () => import('../routes/producer/Producer')),
+          },
+          {
+            name:"门店管理",
+            path: 'store',
+            component: dynamicWrapper(app, ['store','producer'], () => import('../routes/producer/Store')),
           }
         ]
       },
