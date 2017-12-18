@@ -67,9 +67,9 @@ class BasicLayout extends React.PureComponent {
     return { location, breadcrumbNameMap };
   }
   componentDidMount() {
-    /*this.props.dispatch({
+    this.props.dispatch({
       type: 'user/fetchCurrent',
-    });*/
+    });
   }
   componentWillUnmount() {
     clearTimeout(this.resizeTimeout);
@@ -82,6 +82,7 @@ class BasicLayout extends React.PureComponent {
   }
   onMenuClick = ({ key }) => {
     if (key === 'logout') {
+      localStorage.clear()
       this.props.dispatch({
         type: 'login/logout',
       });
@@ -199,13 +200,7 @@ class BasicLayout extends React.PureComponent {
     }, 600);
   }
   render() {
-    const { collapsed, fetchingNotices, getRouteData } = this.props;
-    const currentUser ={
-      name: '后台管理员',
-      avatar: 'https://gw.alipayobjects.com/zos/rmsportal/dRFVcIqZOYPcSNrlJsqQ.png',
-      userid: '00000001',
-      notifyCount: 12,
-    };
+    const {currentUser, collapsed, fetchingNotices, getRouteData } = this.props;
     const menu = (
       <Menu className={styles.menu} selectedKeys={[]} onClick={this.onMenuClick}>
         <Menu.Item disabled><Icon type="user" />个人中心</Menu.Item>

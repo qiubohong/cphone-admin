@@ -5,5 +5,15 @@ export async function query() {
 }
 
 export async function queryCurrent() {
-  return request('/api/currentUser');
+  return new Promise((resolve, reject)=>{
+    let user = {};
+    try{
+      user = JSON.parse(localStorage.getItem('user'));
+    }catch(e){
+      console.log(e);
+    }
+    resolve({
+      ...user
+    });
+});
 }
