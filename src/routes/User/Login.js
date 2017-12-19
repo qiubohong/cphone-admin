@@ -57,7 +57,7 @@ export default class Login extends Component {
   }
 
   renderMessage = (message) => {
-    return (
+    return (  
       <Alert
         style={{ marginBottom: 24 }}
         message={message}
@@ -67,11 +67,11 @@ export default class Login extends Component {
     );
   }
 
-  handleModal(flag, msg){
-    this.setState({
-      visible: !!flag,
-      msg,
-    })
+  handleModal(){
+    Modal.warning({
+      title: '创手机-提醒您',
+      content: '忘记密码，请联系管理员！',
+    });
   }
 
   render() {
@@ -125,20 +125,12 @@ export default class Login extends Component {
             })(
               <Checkbox className={styles.autoLogin}>自动登录</Checkbox>
             )}
-            <a className={styles.forgot} onClick={()=>this.handleModal(true,'详细请联系管理员！')}>忘记密码</a>
+            <a className={styles.forgot} onClick={()=>this.handleModal()}>忘记密码</a>
             <Button size="large" loading={login.submitting} className={styles.submit} type="primary" htmlType="submit">
               登录
             </Button>
           </FormItem>
         </Form>
-        <Modal
-          title="创手机-提示您"
-          visible={this.state.visible}
-          footer={null}
-          onCancel={()=>{this.handleModal}}
-        >
-          {this.state.msg}
-        </Modal>
       </div>
     );
   }
