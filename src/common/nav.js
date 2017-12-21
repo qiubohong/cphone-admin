@@ -25,12 +25,12 @@ export const getNavData = app => [
         icon: 'retweet',
         path: 'recycle',
         children: [{
-          name: '手机管理',
-          path: 'phone',
+          name: '回收手机',
+          path: 'phone1',
           component: dynamicWrapper(app, ['brand','recycle'], () => import('../routes/recycle/RecyclePhone')),
         },{
-          name: '订单管理',
-          path: 'order',
+          name: '回收订单',
+          path: 'order1',
           component: dynamicWrapper(app, ['recycleOrder'], () => import('../routes/recycle/RecycleOrder')),
         }],
       },{
@@ -38,11 +38,11 @@ export const getNavData = app => [
         icon: 'tool',
         path: 'repair',
         children: [{
-          name: '手机管理',
+          name: '维修手机',
           path: 'phone',
           component: dynamicWrapper(app, ['brand','maintain'], () => import('../routes/maintain/MaintainPhone')),
         },{
-          name: '订单管理',
+          name: '维修订单',
           path: 'order',
           component: dynamicWrapper(app, ['maintainOrder'], () => import('../routes/maintain/MaintainOrder')),
         }],

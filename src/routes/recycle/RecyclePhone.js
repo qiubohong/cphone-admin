@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Popconfirm,Row, Col, Card, Collapse, Form, Input, Select,Upload, Icon, Button, InputNumber, Table, Modal, Spin, message, notification, Radio } from 'antd';
+import {Switch, Popconfirm,Row, Col, Card, Collapse, Form, Input, Select,Upload, Icon, Button, InputNumber, Table, Modal, Spin, message, notification, Radio } from 'antd';
 import StandardTable from '../../components/StandardTable';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
@@ -167,6 +167,20 @@ export default class RecyclePhone extends PureComponent {
         }
         
     }
+
+
+    onStatusChange(checked, record){
+        record.status = checked ? 1 : 0;
+        this.props.dispatch({
+            type: 'recycle/update',
+            payload: {
+                ...record
+            },
+            callback: () => {
+                this.initPhones('更新成功');
+            }
+        });
+    }
     handleQuesVisible = (flag, id) => {
         if(!id){
             this.setState({
@@ -216,7 +230,7 @@ export default class RecyclePhone extends PureComponent {
         newQues.push({
             phoneId : editPhoneId,
             problemName: "",
-            problemType: 1,
+            problemType: 0,
             edit: true,
             selects: [{
                 problemItem: "",
@@ -372,9 +386,6 @@ export default class RecyclePhone extends PureComponent {
         }
     }
 
-    handleQues(){
-    }
-
     getQuesById = () => {
         let result = [];
         this.state.newQues.forEach((ques, index) => {
@@ -515,11 +526,13 @@ export default class RecyclePhone extends PureComponent {
                 ),
             },
             {
-                title: '可回收?',
+                title: '上架',
                 dataIndex: 'status',
-                render: val => (
-                    okOrNo[val]
-                ),
+                render: (text,record) => {
+                    return record.status == 0 ? 
+                    <Switch checkedChildren="上" unCheckedChildren="下" onChange={(checked)=>{this.onStatusChange(checked, record)}} />
+                    : <Switch checkedChildren="上" unCheckedChildren="下" defaultChecked onChange={(checked)=>{this.onStatusChange(checked, record)}} />;
+                } 
             },
             {
                 title: '是热门?',
@@ -579,7 +592,7 @@ export default class RecyclePhone extends PureComponent {
             }
         }
         return (
-            <PageHeaderLayout title="热门回收手机管理">
+            <PageHeaderLayout title="回收手机管理">
                 <Card bordered={false}>
                     <div className={styles.tableList}>
                         <div className={styles.tableListOperator}>
@@ -595,7 +608,6 @@ export default class RecyclePhone extends PureComponent {
                 </Card>
                 <Modal title="编辑问题"
                     visible={quesVisible}
-                    onOk={() => this.handleQues()}
                     onCancel={() => this.handleQuesVisible(false)}
                     confirmLoading={quesOperation}
                     footer = {null}

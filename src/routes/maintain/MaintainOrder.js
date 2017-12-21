@@ -31,13 +31,17 @@ export default class MaintainOrder extends PureComponent {
                 this.paginationChange(page,pageSize);
             }
         },
+        modalLoading: false,
+        editJSON:{
+            "amount" : 1 //1 展示 2 编辑
+        }
     };
 
     componentDidMount() {
         this.initQuery();
     }
 
-    initQuery(){
+    initQuery(msg){
         const { dispatch } = this.props;
         const {pagination:{startIndex, pageSize}} = this.state;
         dispatch({
@@ -50,6 +54,7 @@ export default class MaintainOrder extends PureComponent {
                 pageSize,
             }
         });
+        msg && message.success(msg);
     }
     paginationChange(page, pageSize){
         
@@ -81,9 +86,59 @@ export default class MaintainOrder extends PureComponent {
             }
         })
     }
+    handleEditVisible(key,flag){
+        let {editJSON} = this.state;
+        let {lookOrder} = this.state;
+        if(!flag){
+            lookOrder[key] = editJSON[key];
+        }
+        editJSON[key] = flag ? lookOrder[key] : 1;
+        
+        this.setState({
+            editJSON:{
+                ...editJSON
+            },
+            lookOrder:{
+                ...lookOrder
+            }
+        })
+    }
+    handleEdit(key){
+        let {lookOrder} = this.state;
+        this.setState({
+            modalLoading:true
+        })
+        this.props.dispatch({
+            type:'maintainOrder/update',
+            payload:{
+                ...lookOrder
+            },
+            callback:(res)=>{
+                let {editJSON} = this.state;
+                editJSON[key] = 1;
+                this.setState({
+                    modalLoading:false,
+                    editJSON: {
+                        ...editJSON
+                    }
+                });
+
+                this.initQuery('更新成功！')
+            }
+        })
+    }
+    handleEditChange(key,e){
+        let {lookOrder} = this.state;
+        lookOrder[key] = e.target.value;
+        this.setState({
+            lookOrder:{
+                ...lookOrder
+            }
+        })
+    }
     render() {
         const { maintainOrder: { loading, data } } = this.props;
-        const { modalVisible, addMaintainOrder, operation , pagination} = this.state;
+        const { modalVisible, addMaintainOrder, operation , pagination, editJSON} = this.state;
         const key2Name = {
             "id":"编号",
             "cancelTime":"取消时间",
@@ -182,15 +237,32 @@ export default class MaintainOrder extends PureComponent {
                 if(key == 'serviceType'){
                     value = serviceType[value]
                 }
-                temp.push(
-                <FormItem
-                    key = {'view'+key}
-                    labelCol={{ span: 5 }}
-                    wrapperCol={{ span: 15 }}
-                    label={key2Name[key]}
-                >
-                    <span>{value}</span>
-                </FormItem>)
+                let edit = <span>{value}</span>
+                if(editJSON[key]){
+                    if(editJSON[key] == 1){
+                        edit = <div>
+                            <span>{value}</span>
+                            <Button style={{marginLeft:4}} shape="circle" icon="edit"  onClick={()=>{this.handleEditVisible(key, true)}}></Button>
+                            </div>
+                    }else{
+                        edit = (<div>
+                            <Input style={{width:100}} value={value} onChange={(e)=>{this.handleEditChange(key,e)}}/>
+                            <Button style={{marginLeft:4}} type="primary" onClick={()=>{this.handleEdit(key)}}>保存</Button>
+                            <Button style={{marginLeft:4}} onClick={()=>{this.handleEditVisible(key, false)}}>取消</Button>
+                        </div>);
+                    }
+                }
+                if(!!value){
+                    temp.push(
+                        <FormItem
+                            key = {'view'+key}
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label={key2Name[key]}
+                        >
+                            {edit}
+                        </FormItem>)
+                }
             }
             return temp;
         }
@@ -216,7 +288,9 @@ export default class MaintainOrder extends PureComponent {
                     onCancel={() => this.handleModalVisible()}
                     confirmLoading = {operation}
                 >
+                    <Spin spinning={this.state.modalLoading}>
                     {getLookView()}
+                    </Spin>
                 </Modal>
             </PageHeaderLayout>
         );

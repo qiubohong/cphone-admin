@@ -122,6 +122,9 @@ class BasicLayout extends React.PureComponent {
       if (!item.name) {
         return null;
       }
+      if(item.name == '帐户'){
+        return null;
+      }
       let itemPath;
       if (item.path.indexOf('http') === 0) {
         itemPath = item.path;
