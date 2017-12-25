@@ -5,6 +5,7 @@ export default {
 
     state: {
         data: [],
+        one:{},
         loading: true,
     },
 
@@ -143,8 +144,30 @@ export default {
 
             if (callback) callback(response);
         },
+        *queryById({ payload, callback = function(){} }, { call, put }) {
+            yield put({
+                type: 'changeLoading',
+                payload: true,
+            });
+            const response = yield call(recycle.queryById, payload);
+            yield put({
+                type: 'id',
+                payload: response.data,
+            });
+            yield put({
+                type: 'changeLoading',
+                payload: false,
+            });
+            callback(response);
+        },
     },
     reducers: {
+        id(state,action){
+            return {
+                ...state,
+                one: action.payload
+            }
+        },
         save(state, action) {
             return {
                 ...state,

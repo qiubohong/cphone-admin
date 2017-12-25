@@ -31,6 +31,7 @@ export default class MaintainPhone extends PureComponent {
         quesOperation: false,
         editPhoneId: -1,
         newQues: [],
+        tempNewQues:[],
         quesLoading: false,
         fileList: []
     };
@@ -171,7 +172,12 @@ export default class MaintainPhone extends PureComponent {
                         item.selects = [];
                     }
                 });
+
+                const temp = JSON.parse(JSON.stringify(res.data))
                 this.setState({
+                    tempNewQues:[
+                        ...temp
+                    ],
                     newQues:[
                         ...res.data
                     ]
@@ -232,6 +238,21 @@ export default class MaintainPhone extends PureComponent {
         })
     }
 
+    handleDelQuesOpt(quesIndex, selectIndex){
+        let newQues = Object.assign([], this.state.newQues);
+        let temp = [...newQues]
+        temp.forEach((item,i1)=>{
+            item.selects.forEach((item2, i2)=>{
+                if(i2 === selectIndex){
+                    newQues[i1].selects.splice(i2,1);
+                }
+            })
+        });
+        this.setState({
+            newQues
+        });
+    }
+
     handleEdit(record){
         this.setState({
             addPhone: record
@@ -252,13 +273,17 @@ export default class MaintainPhone extends PureComponent {
     }
 
     handleQuesEdit(index, flag){
-        let newQues = Object.assign([], this.state.newQues);
+        let newQues = [];
+        if(!flag){
+            newQues = [...this.state.tempNewQues];
+        }else{
+            newQues = [...this.state.newQues];
+        }
         newQues.forEach((item,i1)=>{
             if(i1 === index){
                 item.edit = !!flag;
             }
         });
-
         this.setState({
             newQues
         })
@@ -415,7 +440,6 @@ export default class MaintainPhone extends PureComponent {
                                         <Radio value={1}>单选</Radio>
                                         <Radio value={0}>多选</Radio>
                                     </RadioGroup>
-                                    <Button type="danger" size="small" icon="close" shape="circle"></Button>
                                     </div>)
                             }else{
                                 return ques.problemType === 1 ? "单选" : "多选";
@@ -437,6 +461,7 @@ export default class MaintainPhone extends PureComponent {
                                 return (<div>
                                 <Input placeholder="选项描述" value={item.problemItem} style={{marginBottom:20}} onChange={(e)=>obj.handleQuesCon(e,'problemItem', -1, idx)}/>
                                 <Input placeholder="选项折扣" type="number" value={item.cost} onChange={(e)=>obj.handleQuesCon(e,'cost', -1, idx)} />
+                                <Button type="danger" size="small" icon="close" shape="circle" onClick={()=>{obj.handleDelQuesOpt(index,idx)}}></Button>
                                 </div>)
                             }else{
                                 return (<div>

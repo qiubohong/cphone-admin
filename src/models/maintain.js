@@ -7,6 +7,7 @@ export default {
 
     state: {
         data: [],
+        one:{},
         count: 0,
         loading: true,
     },
@@ -131,8 +132,30 @@ export default {
             });
             callback(response);
         },
+        *queryById({ payload, callback = function(){} }, { call, put }) {
+            yield put({
+                type: 'changeLoading',
+                payload: true,
+            });
+            const response = yield call(maintain.queryById, payload);
+            yield put({
+                type: 'id',
+                payload: response.data,
+            });
+            yield put({
+                type: 'changeLoading',
+                payload: false,
+            });
+            callback(response);
+        },
     },
     reducers: {
+        id(state,action){
+            return {
+                ...state,
+                one: action.payload
+            }
+        },
         saveCount(state, action){
             return {
                 ...state,

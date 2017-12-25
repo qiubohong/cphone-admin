@@ -31,7 +31,7 @@ export const getNavData = app => [
         },{
           name: '回收订单',
           path: 'order1',
-          component: dynamicWrapper(app, ['recycleOrder'], () => import('../routes/recycle/RecycleOrder')),
+          component: dynamicWrapper(app, ['recycleOrder','customer','recycle','producer'], () => import('../routes/recycle/RecycleOrder')),
         }],
       },{
         name: '维修管理',
@@ -44,7 +44,7 @@ export const getNavData = app => [
         },{
           name: '维修订单',
           path: 'order',
-          component: dynamicWrapper(app, ['maintainOrder'], () => import('../routes/maintain/MaintainOrder')),
+          component: dynamicWrapper(app, ['maintainOrder','customer','maintain','producer'], () => import('../routes/maintain/MaintainOrder')),
         }],
       },
       {

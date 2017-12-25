@@ -136,6 +136,160 @@ export default class MaintainOrder extends PureComponent {
             }
         })
     }
+
+
+    getUserInfo(customerId){
+        this.setState({
+            modalLoading:true
+        })
+        this.props.dispatch({
+            type:'customer/queryById',
+            payload:{
+                customerId
+            },
+            callback:(res)=>{
+                this.setState({
+                    modalLoading:false
+                })
+                if(!res.data){
+                    message.error('查无此用户');
+                    return;
+                }
+
+                Modal.info({
+                    title: '查看用户信息',
+                    content: (
+                      <div>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="用户id"
+                        >
+                            {res.data.id}
+                        </FormItem>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="用户姓名"
+                        >
+                            {res.data.name}
+                        </FormItem>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="用户电话"
+                        >
+                            {res.data.number}
+                        </FormItem>
+                      </div>
+                    ),
+                    onOk() {},
+                  });
+            }
+        })
+    }
+
+    getPhoneInfo(maintainPhoneId){
+        this.setState({
+            modalLoading:true
+        })
+        this.props.dispatch({
+            type:'maintain/queryById',
+            payload:{
+                maintainPhoneId
+            },
+            callback:(res)=>{
+                this.setState({
+                    modalLoading:false
+                })
+                if(!res.data){
+                    message.error('查无此手机');
+                    return;
+                }
+
+                Modal.info({
+                    title: '查看手机信息',
+                    content: (
+                      <div>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="手机id"
+                        >
+                            {res.data.id}
+                        </FormItem>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="手机型号"
+                        >
+                            {res.data.name}
+                        </FormItem>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="回收总价"
+                        >
+                            ￥{res.data.totalPrice}
+                        </FormItem>
+                      </div>
+                    ),
+                    onOk() {},
+                  });
+            }
+        })
+    }
+
+    getProducerInfo(producerId){
+        this.setState({
+            modalLoading:true
+        })
+        this.props.dispatch({
+            type:'producer/queryById',
+            payload:{
+                producerId
+            },
+            callback:(res)=>{
+                this.setState({
+                    modalLoading:false
+                })
+                if(!res.data){
+                    message.error('查无此服务方');
+                    return;
+                }
+
+                Modal.info({
+                    title: '查看服务方信息',
+                    content: (
+                      <div>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="服务方id"
+                        >
+                            {res.data.id}
+                        </FormItem>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="服务方"
+                        >
+                            {res.data.name}
+                        </FormItem>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="电话"
+                        >
+                            {res.data.number}
+                        </FormItem>
+                      </div>
+                    ),
+                    onOk() {},
+                  });
+            }
+        })
+    }
     render() {
         const { maintainOrder: { loading, data } } = this.props;
         const { modalVisible, addMaintainOrder, operation , pagination, editJSON} = this.state;
@@ -190,14 +344,20 @@ export default class MaintainOrder extends PureComponent {
             {
                 title: key2Name['customerId'],
                 dataIndex: 'customerId',
+                render:(val)=>{
+                    return <Button type="primary" onClick={()=>{this.getUserInfo(val)}}>查看</Button>
+                }
             },
             {
-                title: key2Name['period'],
-                dataIndex: 'period',
+                title: key2Name['applyTime'],
+                dataIndex: 'applyTime',
+                render(value){
+                    return moment(value).format('YYYY-MM-DD HH:mm:ss')
+                }
             },
             {
-                title: key2Name['serialNumber'],
-                dataIndex: 'serialNumber',
+                title: key2Name['amount'],
+                dataIndex: 'amount',
             },
             {
                 title: '操作',
@@ -237,6 +397,18 @@ export default class MaintainOrder extends PureComponent {
                 if(key == 'serviceType'){
                     value = serviceType[value]
                 }
+                if(key == 'customerId'){
+                    value = <Button type="primary" onClick={()=>{this.getUserInfo(this.state.lookOrder[key])}}>查看用户信息</Button>
+                }
+
+                if(key == 'recyclePhoneId'){
+                    value = <Button type="primary" onClick={()=>{this.getPhoneInfo(this.state.lookOrder[key])}}>查看手机信息</Button>
+                }
+
+                if(key == 'producerId'){
+                    value = <Button type="primary" onClick={()=>{this.getProducerInfo(this.state.lookOrder[key])}}>查看服务方信息</Button>
+                }
+
                 let edit = <span>{value}</span>
                 if(editJSON[key]){
                     if(editJSON[key] == 1){

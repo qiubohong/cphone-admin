@@ -13,7 +13,7 @@ const { Option } = Select;
 const getValue = obj => Object.keys(obj).map(key => obj[key]).join(',');
 
 @connect(state => ({
-    recycleOrder: state.recycleOrder,
+    recycleOrder: state.recycleOrder
 }))
 @Form.create()
 export default class RecycleOrder extends PureComponent {
@@ -137,6 +137,158 @@ export default class RecycleOrder extends PureComponent {
             }
         })
     }
+    getUserInfo(customerId){
+        this.setState({
+            modalLoading:true
+        })
+        this.props.dispatch({
+            type:'customer/queryById',
+            payload:{
+                customerId
+            },
+            callback:(res)=>{
+                this.setState({
+                    modalLoading:false
+                })
+                if(!res.data){
+                    message.error('查无此用户');
+                    return;
+                }
+
+                Modal.info({
+                    title: '查看用户信息',
+                    content: (
+                      <div>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="用户id"
+                        >
+                            {res.data.id}
+                        </FormItem>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="用户姓名"
+                        >
+                            {res.data.name}
+                        </FormItem>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="用户电话"
+                        >
+                            {res.data.number}
+                        </FormItem>
+                      </div>
+                    ),
+                    onOk() {},
+                  });
+            }
+        })
+    }
+
+    getPhoneInfo(recyclePhoneId){
+        this.setState({
+            modalLoading:true
+        })
+        this.props.dispatch({
+            type:'recycle/queryById',
+            payload:{
+                recyclePhoneId
+            },
+            callback:(res)=>{
+                this.setState({
+                    modalLoading:false
+                })
+                if(!res.data){
+                    message.error('查无此手机');
+                    return;
+                }
+
+                Modal.info({
+                    title: '查看手机信息',
+                    content: (
+                      <div>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="手机id"
+                        >
+                            {res.data.id}
+                        </FormItem>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="手机型号"
+                        >
+                            {res.data.name}
+                        </FormItem>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="回收总价"
+                        >
+                            ￥{res.data.totalPrice}
+                        </FormItem>
+                      </div>
+                    ),
+                    onOk() {},
+                  });
+            }
+        })
+    }
+
+    getProducerInfo(producerId){
+        this.setState({
+            modalLoading:true
+        })
+        this.props.dispatch({
+            type:'producer/queryById',
+            payload:{
+                producerId
+            },
+            callback:(res)=>{
+                this.setState({
+                    modalLoading:false
+                })
+                if(!res.data){
+                    message.error('查无此服务方');
+                    return;
+                }
+
+                Modal.info({
+                    title: '查看服务方信息',
+                    content: (
+                      <div>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="服务方id"
+                        >
+                            {res.data.id}
+                        </FormItem>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="服务方"
+                        >
+                            {res.data.name}
+                        </FormItem>
+                        <FormItem
+                            labelCol={{ span: 5 }}
+                            wrapperCol={{ span: 15 }}
+                            label="电话"
+                        >
+                            {res.data.number}
+                        </FormItem>
+                      </div>
+                    ),
+                    onOk() {},
+                  });
+            }
+        })
+    }
     render() {
         const { recycleOrder: { loading, data } } = this.props;
         const { modalVisible, addRecycleOrder, operation , pagination, editJSON} = this.state;
@@ -145,19 +297,19 @@ export default class RecycleOrder extends PureComponent {
             "cancelTime":"取消时间",
             "remark":"备注",
             "status" : "状态",
-            "producerId":"服务方id",
-            "applyTime":"服务方时间",
+            "producerId":"服务方信息",
+            "applyTime":"下单时间",
             "serialNumber":"流水号",
             "iphonePasswd":"解锁密码",
             "period":"预约时间",
             "serviceType":"服务方式",
-            "recyclePhoneId":"回收手机id",
+            "recyclePhoneId":"回收手机",
             "expressCompany":"快递公司名称",
             "expressNumber":"快递单号",
             "amount":"订单金额",
             "confirmTime":"确认时间",
             "problemSelects":"已选问题",
-            "customerId":"用户id",
+            "customerId":"用户信息",
             "address":"用户详细地址",
             "acceptTime":"接单时间",
             "finishTime":"服务完成时间",
@@ -191,14 +343,20 @@ export default class RecycleOrder extends PureComponent {
             {
                 title: key2Name['customerId'],
                 dataIndex: 'customerId',
+                render:(val)=>{
+                    return <Button type="primary" onClick={()=>{this.getUserInfo(val)}}>查看</Button>
+                }
             },
             {
-                title: key2Name['period'],
-                dataIndex: 'period',
+                title: key2Name['applyTime'],
+                dataIndex: 'applyTime',
+                render(value){
+                    return moment(value).format('YYYY-MM-DD HH:mm:ss')
+                }
             },
             {
-                title: key2Name['serialNumber'],
-                dataIndex: 'serialNumber',
+                title: key2Name['amount'],
+                dataIndex: 'amount',
             },
             {
                 title: '操作',
@@ -236,6 +394,18 @@ export default class RecycleOrder extends PureComponent {
 
                 if(key == 'serviceType'){
                     value = serviceType[value]
+                }
+
+                if(key == 'customerId'){
+                    value = <Button type="primary" onClick={()=>{this.getUserInfo(this.state.lookOrder[key])}}>查看用户信息</Button>
+                }
+
+                if(key == 'recyclePhoneId'){
+                    value = <Button type="primary" onClick={()=>{this.getPhoneInfo(this.state.lookOrder[key])}}>查看手机信息</Button>
+                }
+
+                if(key == 'producerId'){
+                    value = <Button type="primary" onClick={()=>{this.getProducerInfo(this.state.lookOrder[key])}}>查看服务方信息</Button>
                 }
                 let edit = <span>{value}</span>;
                 if(editJSON[key]){

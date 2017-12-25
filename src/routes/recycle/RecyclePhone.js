@@ -33,6 +33,7 @@ export default class RecyclePhone extends PureComponent {
         quesOperation: false,
         editPhoneId: -1,
         newQues: [],
+        tempNewQues:[],
         quesLoading: false,
         fileList: []
     };
@@ -212,7 +213,12 @@ export default class RecyclePhone extends PureComponent {
                         item.selects = [];
                     }
                 });
+
+                const temp = JSON.parse(JSON.stringify(res.data))
                 this.setState({
+                    tempNewQues:[
+                        ...temp
+                    ],
                     newQues:[
                         ...res.data
                     ]
@@ -273,6 +279,24 @@ export default class RecyclePhone extends PureComponent {
         })
     }
 
+    handleDelQuesOpt(quesIndex, selectIndex){
+        console.log(selectIndex)
+        let newQues = [...this.state.newQues];
+        let temp = [...newQues]
+        temp.forEach((item,i1)=>{
+            if(quesIndex === i1){
+                item.selects.forEach((item2, i2)=>{
+                    if(i2 === selectIndex){
+                        newQues[i1].selects.splice(i2,1);
+                    }
+                })
+            }
+        });
+        this.setState({
+            newQues
+        });
+    }
+
     handleEdit(record){
         this.setState({
             addPhone: record
@@ -293,13 +317,18 @@ export default class RecyclePhone extends PureComponent {
     }
 
     handleQuesEdit(index, flag){
-        let newQues = Object.assign([], this.state.newQues);
+        console.log(this.state.tempNewQues)
+        let newQues = [];
+        if(!flag){
+            newQues = Object.assign([], this.state.tempNewQues);
+        }else{
+            newQues = Object.assign([], this.state.newQues);
+        }
         newQues.forEach((item,i1)=>{
             if(i1 === index){
                 item.edit = !!flag;
             }
         });
-
         this.setState({
             newQues
         })
@@ -456,7 +485,7 @@ export default class RecyclePhone extends PureComponent {
                                 return (<div>
                                 <Input placeholder="选项描述" value={item.problemItem} style={{marginBottom:20}} onChange={(e)=>obj.handleQuesCon(e,'problemItem', -1, idx)}/>
                                 <Input placeholder="选项折扣" type="number" value={item.cost} onChange={(e)=>obj.handleQuesCon(e,'cost', -1, idx)} />
-                                <Button type="danger" size="small" icon="close" shape="circle"></Button>
+                                <Button type="danger" size="small" icon="close" shape="circle" onClick={()=>{obj.handleDelQuesOpt(index,idx)}}></Button>
                                 </div>)
                             }else{
                                 return (<div>

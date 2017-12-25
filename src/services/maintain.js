@@ -7,8 +7,11 @@ export async function count() {
 }
 
 export async function query(params) {
-  console.log(params)
   return request(DOMAIN+`/admin/maintain/phone/queryList?${stringify(params)}`);
+}
+
+export async function queryById(params) {
+  return request(DOMAIN+`/admin/maintain/phone/queryById?${stringify(params)}`);
 }
 
 export async function add(params) {

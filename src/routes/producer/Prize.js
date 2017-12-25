@@ -12,13 +12,12 @@ const RadioGroup = Radio.Group;
 const getValue = obj => Object.keys(obj).map(key => obj[key]).join(',');
 
 @connect(state => ({
-    store: state.store,
-    producer: state.producer,
+    prize: state.prize,
 }))
 @Form.create()
-export default class Store extends PureComponent {
+export default class Prize extends PureComponent {
     state = {
-        addStore: {
+        addPrize: {
             producerId:-1,
             number: '', 
             name:'', 

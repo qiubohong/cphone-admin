@@ -10,6 +10,10 @@ export async function query(params) {
   return request(DOMAIN+`/admin/customer/queryList?${stringify(params)}`);
 }
 
+export async function queryById(params) {
+  return request(DOMAIN+`/admin/customer/queryById?${stringify(params)}`);
+}
+
 export async function add(params) {
     return request(DOMAIN+`/admin/customer/add?${stringify(params)}`);
 }
