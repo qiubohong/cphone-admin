@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import {Radio,  Popconfirm, Row, Col, Card, Form, Input, Select, Icon, Button, InputNumber, Table, Modal,Spin , message } from 'antd';
+import {Upload, Radio,  Popconfirm, Row, Col, Card, Form, Input, Select, Icon, Button, InputNumber, Table, Modal,Spin , message } from 'antd';
 import StandardTable from '../../components/StandardTable';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
@@ -18,12 +18,10 @@ const getValue = obj => Object.keys(obj).map(key => obj[key]).join(',');
 export default class Prize extends PureComponent {
     state = {
         addPrize: {
-            producerId:-1,
-            number: '', 
-            name:'', 
-            address: '',
-            lat: '',
-            lng: '',
+            prizeName:"",
+            prizeValue: '', 
+            prizeRaffleNum:'', 
+            prizeImgHttpPath: ''
         },
         modalVisible: false,
         operation: false,
@@ -35,28 +33,25 @@ export default class Prize extends PureComponent {
                 this.paginationChange(page,pageSize);
             }
         },
+        fileList:[]
     };
 
     componentDidMount() {
         this.initQuery();
-        const {pagination:{startIndex, pageSize}} = this.state;
-        this.props.dispatch({
-            type: 'producer/fetch',
-            payload: {
-                startIndex,
-                pageSize,
-            }
-        });
     }
 
     initQuery(){
         const { dispatch } = this.props;
         const {pagination:{startIndex, pageSize}} = this.state;
         dispatch({
-            type: 'store/count',
-        })
+            type: 'prize/fetch',
+            payload: {
+                startIndex,
+                pageSize,
+            }
+        });
         dispatch({
-            type: 'store/fetch',
+            type: 'prize/now',
             payload: {
                 startIndex,
                 pageSize,
@@ -69,51 +64,42 @@ export default class Prize extends PureComponent {
 
     handleModalVisible = (flag) => {
         this.setState({
+            fileList:[],
             modalVisible: !!flag,
         });
     }
-    handleName = (e) => {
-        let addStore = Object.assign({},this.state.addStore);
-        addStore.name = e.target.value;
+    handlePrizeName = (e) => {
+        let addPrize = Object.assign({},this.state.addPrize);
+        addPrize.prizeName = e.target.value;
         this.setState({
-            addStore
+            addPrize
         });
     }
-    handleProducerId = (val)=>{
-        let addStore = Object.assign({},this.state.addStore);
-        addStore.producerId = val;
+
+    handlePrizeValue = (e) => {
+        let addPrize = Object.assign({},this.state.addPrize);
+        addPrize.prizeValue = e.target.value;
         this.setState({
-            addStore
+            addPrize
         });
     }
-    handleNumber = (e) => {
-        let addStore = Object.assign({},this.state.addStore);
-        addStore.number = e.target.value;
+
+    handlePprizeRaffleNum = (e) => {
+        let addPrize = Object.assign({},this.state.addPrize);
+        addPrize.prizeRaffleNum = e.target.value;
         this.setState({
-            addStore
+            addPrize
         });
     }
-    handleAddress = (e) => {
-        let addStore = Object.assign({},this.state.addStore);
-        addStore.address = e.target.value;
+
+    handlePrizeImgHttpPath = (e) => {
+        let addPrize = Object.assign({},this.state.addPrize);
+        addPrize.prizeImgHttpPath = e.target.value;
         this.setState({
-            addStore
+            addPrize
         });
     }
-    handleLng = (e) => {
-        let addStore = Object.assign({},this.state.addStore);
-        addStore.lng = e.target.value;
-        this.setState({
-            addStore
-        });
-    }
-    handleLat = (e) => {
-        let addStore = Object.assign({},this.state.addStore);
-        addStore.lat = e.target.value;
-        this.setState({
-            addStore
-        });
-    }
+
     afterAddOrUpdate(msg){
         this.setState({
             operation:false
@@ -124,133 +110,131 @@ export default class Prize extends PureComponent {
         });
         this.initQuery();
         this.setState({
-            addStore:{
-                producerId:-1,
-                number: '', 
-                name:'', 
-                address: '',
-                lat: '',
-                lng: '',
+            addPrize: {
+                prizeName:"",
+                prizeValue: '', 
+                prizeRaffleNum:'', 
+                prizeImgHttpPath: ''
             }
         });
     }
     handleAdd = () => {
-        const { addStore} = this.state;
+        const { addPrize} = this.state;
         const {dispatch} = this.props;
         this.setState({
             operation:true
         })
-        if(addStore.id){
-            dispatch({
-                type: 'store/update',
-                payload: {
-                    ...addStore
-                },
-                callback: (res) => {
-                    if(!res || !res.data){
-                        this.setState({
-                            operation:false
-                        })
-                        return;
-                    }
-                    this.afterAddOrUpdate("修改成功！")
-                }
-            });
-        }else{
-            dispatch({
-                type: 'store/add',
-                payload: {
-                    ...addStore
-                },
-                callback: () => {
-                    this.afterAddOrUpdate("添加成功！")
-                }
-            });
-        }
-    }
-
-    handleDel(storeId){
-        this.props.dispatch({
-            type:"store/del",
-            payload:{
-                storeId
+        dispatch({
+            type: 'prize/add',
+            payload: {
+                ...addPrize
             },
-            callback:()=>{
-                this.initQuery('删除成功！')
+            callback: () => {
+                this.afterAddOrUpdate("添加成功！")
             }
-        })
-    }
-
-    handleEdit(record){
-        this.setState({
-            addStore: {
-                ...record
-            }
-        })
-        this.handleModalVisible(true);
+        });
     }
 
     render() {
-        const { store: { loading, data }, producer} = this.props;
-        const producers = producer.data;
-        const { modalVisible, addStore, operation , pagination} = this.state;
-        
-        const columns = [
-            {
-                title: '编号',
-                dataIndex: 'id',
-            },
-            {
-                title: '门店名称',
-                dataIndex: 'name',
-            },
-            {
-                title: '工作人员',
-                dataIndex: 'producerId',
-                render: (val) =>{
-                    let result = "";
-                    producers.forEach((item)=>{
-                        if(item.id == val){
-                            result = item.name
-                        }
-                    })
-                    return result;
+        const { prize: { loading, data, one },} = this.props;
+        const { modalVisible, addPrize, operation , pagination} = this.state;
+        const current = one.prizeName ? [one] : [];
+
+        const uploadProps ={
+            accept:"image/*",
+            action: "//chuangshouji.com/cphone/phone/uploadFile/",
+            listType: 'picture',
+            defaultFileList: [],
+            fileList: this.state.fileList,
+            className: 'upload-list-inline',
+            name: "productFile",
+            onChange: (res)=>{
+                let file = res.file;
+                let fileList = res.fileList;
+                fileList = fileList.slice(-1);
+                this.setState({ fileList });
+                if(file.status === "done" && file.response){
+                    let prizeImgHttpPath = "http://"+file.response.data;
+                    let addPrize = Object.assign({},this.state.addPrize,{ prizeImgHttpPath }) 
+                    this.setState({
+                        addPrize
+                    });
+                }else if(file.status === "removed"){
+                    let addPrize = Object.assign({},this.state.addPrize,{ prizeImgHttpPath:"" }) 
+                    this.setState({
+                        addPrize
+                    });
                 }
+            }
+        }
+
+        const baseCol = [
+            {
+                title: '奖品名称',
+                dataIndex: 'prizeName',
             },
             {
-                title: '联系电话',
-                dataIndex: 'number'
+                title: '奖品价值',
+                dataIndex: 'prizeValue',
             },
             {
-                title: '地址',
-                dataIndex: 'address'
+                title: '兑换码个数',
+                dataIndex: 'raffleNum'
+            },
+            {
+                title: '奖品图片',
+                dataIndex: 'prizeImgHttpPath',
+                render(val){
+                    var imgUrl = val;
+                    if(val.indexOf('http') < 0 ){
+                        imgUrl = "http://" + imgUrl;
+                    }
+                    return <img src={imgUrl} style={{height:100}} />
+                }
+            }
+        ];
+        const currentCol = [
+            ...baseCol,
+            {
+                title: '发放个数',
+                dataIndex: 'sentRaffleNum' 
+            },
+            {
+                title: '添加时间',
+                dataIndex: 'prizeAddTime'
+            }
+        ];
+
+        const columns = [
+            ...baseCol,
+            {
+                title: '中奖兑换码',
+                dataIndex: 'awardRaffleId' 
             },{
-                title: '操作',
-                key: 'operation',
-                fixed: 'right',
-                width: 180,
-                render: (text, record) => (<div>
-                    <Button onClick={()=>this.handleEdit(record)}>编辑</Button>&nbsp;
-                    <Popconfirm title="确定删除？" onConfirm={() => this.handleDel(record.id)}>
-                        <Button type="danger">删除</Button>
-                    </Popconfirm>
-                </div>),
-            },
+                title: '中奖手机号',
+                dataIndex: 'awardCustomerPhone'
+            },{
+                title: '中奖时间',
+                dataIndex: 'awardTime'
+            }
         ];
 
 
-        let producerOpts = [];
-        producers.forEach((item, index) => {
-            producerOpts.push(<Option key={"item" + index} value={item.id} >{item.name}</Option>)
-        });
-
         return (
-            <PageHeaderLayout title="门店管理">
+            <PageHeaderLayout title="奖品管理">
                 <Card bordered={false}>
                     <div className={styles.tableList}>
                         <div className={styles.tableListOperator}>
-                            <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>新建</Button>
+                            <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>新建or替换当前奖品</Button>
                         </div>
+                        <h2>当前奖品</h2>
+                        <Table
+                            rowKey={record => record.id}
+                            loading={loading}
+                            dataSource={current}
+                            columns={currentCol}
+                        />
+                        <h2>开奖记录</h2>
                         <Table
                             rowKey={record => record.id}
                             loading={loading}
@@ -261,7 +245,7 @@ export default class Prize extends PureComponent {
                     </div>
                 </Card>
                 <Modal
-                    title="添加新门店"
+                    title="添加新奖品"
                     visible={modalVisible}
                     onOk={this.handleAdd}
                     onCancel={() => this.handleModalVisible()}
@@ -270,44 +254,35 @@ export default class Prize extends PureComponent {
                 <FormItem
                     labelCol={{ span: 5 }}
                     wrapperCol={{ span: 15 }}
-                    label="工作人员"
+                    label="奖品名"
                 >
-                    <Select style={{ width: 120 }} defaultValue={addStore.producerId} onChange={this.handleProducerId}>{producerOpts}</Select>
+                    <Input placeholder="请输入奖品名" onChange={this.handlePrizeName} value={addPrize.prizeName} />
                 </FormItem>
                     <FormItem
                         labelCol={{ span: 5 }}
                         wrapperCol={{ span: 15 }}
-                        label="门店名称"
+                        label="奖品价值"
                     >
-                        <Input placeholder="请输入门店昵称" onChange={this.handleName} value={addStore.name} />
+                        <Input placeholder="请输入奖品价值" type="number" onChange={this.handlePrizeValue} value={addPrize.prizeValue} />
                     </FormItem>
                     <FormItem
                         labelCol={{ span: 5 }}
                         wrapperCol={{ span: 15 }}
-                        label="联系方式"
+                        label="兑换码个数"
                     >
-                        <Input placeholder="请输入门店联系方式" onChange={this.handleNumber} value={addStore.number} />
+                        <Input placeholder="请输入兑换码个数" type="number" onChange={this.handlePprizeRaffleNum} value={addPrize.prizeRaffleNum} />
                     </FormItem>
                     <FormItem
                         labelCol={{ span: 5 }}
                         wrapperCol={{ span: 15 }}
-                        label="门店地址"
+                        label="奖品图片"
                     >
-                        <Input placeholder="请输入门店地址" onChange={this.handleAddress} value={addStore.address} />
-                    </FormItem>
-                    <FormItem
-                        labelCol={{ span: 5 }}
-                        wrapperCol={{ span: 15 }}
-                        label="经度"
-                    >
-                        <Input placeholder="请输入经度" onChange={this.handleLng} value={addStore.lng} />
-                    </FormItem>
-                       <FormItem
-                        labelCol={{ span: 5 }}
-                        wrapperCol={{ span: 15 }}
-                        label="纬度"
-                    >
-                       <Input placeholder="请输入纬度" onChange={this.handleLat} value={addStore.lat} />
+                        <Input placeholder="请输入奖品图片" onChange={this.handlePrizeImgHttpPath} value={addPrize.prizeImgHttpPath} />
+                        <Upload {...uploadProps}>
+                            <Button>
+                                <Icon type="upload" />上传图片
+                            </Button>
+                        </Upload>
                     </FormItem>
                 </Modal>
             </PageHeaderLayout>

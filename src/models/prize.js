@@ -1,14 +1,31 @@
-import  * as customer  from '../services/prize';
+import  * as prize  from '../services/prize';
 
 export default {
     namespace: 'prize',
 
     state: {
         data: [],
+        one:{},
         loading: true,
     },
 
     effects: {
+        *now({ payload, callback=function(){}}, { call, put }) {
+            yield put({
+                type: 'changeLoading',
+                payload: true,
+            });
+            const response = yield call(prize.now, payload);
+            yield put({
+                type: 'id',
+                payload: response,
+            });
+            yield put({
+                type: 'changeLoading',
+                payload: false,
+            });
+            callback();
+        },
         *fetch({ payload, callback=function(){}}, { call, put }) {
             yield put({
                 type: 'changeLoading',
@@ -41,6 +58,12 @@ export default {
         }
     },
     reducers: {
+        id(state, action){
+            return {
+                ...state,
+                one: action.payload
+            }
+        },
         saveCount(state, action){
             return {
                 ...state,
