@@ -24,7 +24,7 @@ export default {
                 type: 'changeLoading',
                 payload: false,
             });
-            if (callback) callback();
+            if (callback) callback(response.data);
         },
         *add({ payload, callback }, { call, put }) {
             yield put({

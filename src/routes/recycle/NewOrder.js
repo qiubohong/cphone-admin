@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import {DatePicker, Radio, Card, Form, Input, Select, Icon, Button, InputNumber, Table, Modal,Spin , message } from 'antd';
+import {List, DatePicker, Radio, Card, Form, Input, Select, Icon, Button, InputNumber, Table, Modal,Spin , message } from 'antd';
 import StandardTable from '../../components/StandardTable';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
@@ -8,18 +8,21 @@ import styles from '../Table.less';
 
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
-const {confirm, } = Modal;
+const Search = Input.Search;
+const {confirm} = Modal;
 const { Option } = Select;
 const { TextArea } = Input;
 const getValue = obj => Object.keys(obj).map(key => obj[key]).join(',');
 
 @connect(state => ({
+    recycle: state.recycle,
     recycleOrder: state.recycleOrder,
 }))
 @Form.create()
 export default class NewOrder extends PureComponent {
     state = {
         addNewOrder: {
+            "customerId":"",
             "recyclePhoneId": "",
             "serviceType": "",
             "storeId": "",
@@ -31,7 +34,18 @@ export default class NewOrder extends PureComponent {
             "remark": "",
         },
         modalVisible: false,
-        loading: false
+        loading: false,
+
+        customerVisible: false,
+        customerLoading: false,
+        customerSelect: {},
+
+        phones: [],
+        phoneVisible:false,
+        phoneLoading: false,
+        phoneSelect:{},
+        phoneStep: 1,
+        phoneProblems:[],
     };
 
     componentDidMount() {
@@ -86,9 +100,77 @@ export default class NewOrder extends PureComponent {
           });
     }
 
+    openPhone(){
+        this.setState({
+            phoneVisible: true,
+            phoneLoading: true
+        })
+
+        this.props.dispatch({
+            type: 'recycle/query',
+            payload: {
+                startIndex:0,
+                pageSize:1000
+            },
+            callback:(data)=>{
+                this.setState({
+                    phoneLoading: false,
+                    phones: [
+                        ...data
+                    ]
+                })
+            }
+        });
+    }
+    handlePhone(e){
+        this.state.phones.forEach((item)=>{
+            if(item.id == e.target.value){
+                this.setState({
+                    phoneSelect:{
+                        ...item
+                    }
+                })
+            }
+        })
+    }
+    nextPhone(){
+        if(!this.state.phoneSelect.id){
+            message.error("请选择手机！")
+            return;
+        }
+        this.setState({
+            phoneLoading:true,
+            phoneStep:2
+        })
+        this.props.dispatch({
+            type:"recycle/queryProblem",
+            payload:{
+                pageSize: 100,
+                startIndex: 0,
+                recyclePhoneId: this.state.phoneSelect.id
+            },
+            callback: (res)=>{
+                this.setState({
+                    phoneLoading:false,
+                })
+            }
+        })
+    }
+
     render() {
-        const { recycleOrder:{}} = this.props;
-        const { modalVisible, addNewOrder, loading} = this.state;
+        const { recycleOrder, recycle} = this.props;
+        const { modalVisible, addNewOrder, loading, 
+            customerSelect,
+            customerLoading,
+            customerVisible,
+
+            phones,
+            phoneVisible,
+            phoneLoading,
+            phoneSelect,
+            phoneStep,
+
+        } = this.state;
         const key2Name = {
             "id":"编号",
             "cancelTime":"取消时间",
@@ -116,9 +198,18 @@ export default class NewOrder extends PureComponent {
             let temp = [];
             for(let key in addNewOrder){
                 let edit = <Input value={addNewOrder[key]} onChange={(e)=>{this.handleChange(e,key)}} />
-                
+                if(key == 'customerId'){
+                    edit = <Button type="primary" onClick={()=>{this.openCustomer()}}>
+                        {
+                            customerSelect.id ? "("+customerSelect.name+")" : "选择用户"
+                        }
+                    </Button>
+                }
+
                 if(key == 'recyclePhoneId'){
-                    edit = <Button type="primary">选择手机</Button>
+                    edit = <Button type="primary" onClick={()=>{this.openPhone()}}>{
+                        phoneSelect.id ? phoneSelect.name : "选择手机"
+                    }</Button>
                 }
 
                 if(key == 'storeId'){
@@ -172,6 +263,14 @@ export default class NewOrder extends PureComponent {
               },
             },
           };
+        let searchPhone = (value)=>{
+            let result = recycle.data.filter((item)=>{
+                return item.name.indexOf(value) >= 0;
+            })
+            this.setState({
+                phones:[...result]
+            })
+        }
         return (
             <PageHeaderLayout title="新建订单">
                 <Card bordered={false}>
@@ -186,6 +285,42 @@ export default class NewOrder extends PureComponent {
                         </Form>
                     </div>
                 </Card>
+                <Modal
+                    title="选择手机"
+                    okText = "下一步"
+                    visible={phoneVisible}
+                    onOk={()=>{ this.nextPhone()}}
+                    onCancel={() => { 
+                        this.setState({
+                            phoneVisible:false, 
+                            phoneSelect:{},
+                            phoneStep:1,
+                        })}}
+                    >
+                    <Spin spinning={phoneLoading}>
+                    {
+                        phoneStep == 1?<div>
+                        <Search
+                            placeholder="请输入要搜索的手机号"
+                            onSearch={value => {searchPhone(value)}}
+                            enterButton
+                        />
+                        <div style={{margin:"8px 0px"}}>选中手机：{phoneSelect.name}</div>
+                        <RadioGroup onChange={(e)=>{this.handlePhone(e)}} style={{display:"block", marginTop:8}}>
+                            <List
+                                bordered
+                                dataSource={phones}
+                                renderItem={item => (<List.Item><Radio value={item.id}>{item.name}</Radio></List.Item>)}
+                            />
+                        </RadioGroup>
+                    </div>
+                     : 
+                     <div>
+                     选择问题
+                     </div>
+                    }   
+                    </Spin>
+                </Modal>
             </PageHeaderLayout>
         );
     }

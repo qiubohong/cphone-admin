@@ -11,7 +11,7 @@ export async function query(params) {
 }
 
 export async function add(params) {
-    return request(DOMAIN+`/admin/recycle/order/add?${stringify(params)}`);
+    return request(DOMAIN+`/admin/recycle/order/add`,{method:"POST",body:params});
 }
 
 export async function update(params) {
