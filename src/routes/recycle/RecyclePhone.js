@@ -265,13 +265,16 @@ export default class RecyclePhone extends PureComponent {
         let newQues = Object.assign([], this.state.newQues);
         newQues.forEach((item,i1)=>{
             if(i1 === quesIndex){
-                item[key] = e.target.value;
-            }
-            item.selects.forEach((item2, i2)=>{
-                if(i2 === selectIndex){
-                    item2[key] = e.target.value;
+                if(selectIndex === -1){
+                    item[key] = e.target.value;
+                }else{
+                    item.selects.forEach((item2, i2)=>{
+                        if(i2 === selectIndex){
+                            item2[key] = e.target.value;
+                        }
+                    })
                 }
-            })
+            }
         });
 
         this.setState({
@@ -287,13 +290,21 @@ export default class RecyclePhone extends PureComponent {
             if(quesIndex === i1){
                 item.selects.forEach((item2, i2)=>{
                     if(i2 === selectIndex){
-                        newQues[i1].selects.splice(i2,1);
+                        if(item2.id){
+                            this.props.dispatch({
+                                type : "recycle/delSelect",
+                                payload: {
+                                    recycleProblemSelectId : item2.id
+                                }
+                            })
+                        }
+                        newQues[i1].selects.splice(i2,1); 
+                        this.setState({
+                            newQues
+                        });
                     }
                 })
             }
-        });
-        this.setState({
-            newQues
         });
     }
 
@@ -317,12 +328,27 @@ export default class RecyclePhone extends PureComponent {
     }
 
     handleQuesEdit(index, flag){
-        console.log(this.state.tempNewQues)
-        let newQues = [];
+        let newQues = Object.assign([], this.state.newQues);
         if(!flag){
-            newQues = Object.assign([], this.state.tempNewQues);
-        }else{
-            newQues = Object.assign([], this.state.newQues);
+            this.state.tempNewQues.forEach((item,i1)=>{
+                newQues.forEach((item2,i2)=>{
+                    if(i1 === i2){
+                        item2.problemName = item.problemName;
+                        item2.problemType = item.problemType;
+
+                        let selectsTemp = [];
+                        item2.selects.forEach(i2s=>{
+                            item.selects.forEach(i1s=>{
+                                if(i2s.id == i1s.id){
+                                    selectsTemp.push({...i1s});
+                                }
+                            })
+                        });
+
+                        newQues[i2].selects = [...selectsTemp];
+                    }
+                });
+            });
         }
         newQues.forEach((item,i1)=>{
             if(i1 === index){
@@ -349,7 +375,7 @@ export default class RecyclePhone extends PureComponent {
                     payload:{
                         pageSize: 100,
                         startIndex: 0,
-                        recyclePhoneId: this.state.editPhoneId
+                        recyclePhoneId: ques.phoneId
                     },
                     callback: (res)=>{
                         if(!res.data){
@@ -483,9 +509,15 @@ export default class RecyclePhone extends PureComponent {
                         function(obj){
                             if (ques.edit) { 
                                 return (<div>
-                                <Input placeholder="选项描述" value={item.problemItem} style={{marginBottom:20}} onChange={(e)=>obj.handleQuesCon(e,'problemItem', -1, idx)}/>
-                                <Input placeholder="选项折扣" type="number" value={item.cost} onChange={(e)=>obj.handleQuesCon(e,'cost', -1, idx)} />
-                                <Button type="danger" size="small" icon="close" shape="circle" onClick={()=>{obj.handleDelQuesOpt(index,idx)}}></Button>
+                                <Input placeholder="选项描述" value={item.problemItem} style={{marginBottom:20}} onChange={(e)=>obj.handleQuesCon(e,'problemItem', index, idx)}/>
+                                <Input placeholder="选项折扣" type="number" value={item.cost} onChange={(e)=>obj.handleQuesCon(e,'cost', index, idx)} />
+                                {item.id ?
+                                    <Popconfirm title="删除不可恢复？" onConfirm={()=>obj.handleDelQuesOpt(index,idx)}>
+                                        <Button type="danger" size="small" icon="close" shape="circle"></Button>
+                                    </Popconfirm>
+                                    :
+                                    <Button type="danger" size="small" icon="close" shape="circle" onClick={()=>{obj.handleDelQuesOpt(index,idx)}}></Button>
+                                }
                                 </div>)
                             }else{
                                 return (<div>

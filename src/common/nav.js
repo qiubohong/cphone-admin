@@ -32,11 +32,11 @@ export const getNavData = app => [
           name: '回收订单',
           path: 'order1',
           component: dynamicWrapper(app, ['recycleOrder','customer','recycle','producer'], () => import('../routes/recycle/RecycleOrder')),
-        },{
+        }/*,{
           name: '新建订单',
           path: 'new1',
           component: dynamicWrapper(app, ['recycleOrder','customer','recycle','producer'], () => import('../routes/recycle/NewOrder')),
-        }],
+        }*/],
       },{
         name: '维修管理',
         icon: 'tool',

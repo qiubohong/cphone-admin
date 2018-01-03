@@ -51,8 +51,11 @@ export async function delProblem(params) {
 }
 
 export async function updateSelect(params) {
-    console.log(params)
     return request(DOMAIN + `/admin/recycle/select/update`,{method:"POST", body:params});
+}
+
+export async function delSelect(params) {
+    return request(DOMAIN + `/admin/recycle/select/delById?${stringify(params)}`);
 }
 
 

@@ -42,5 +42,10 @@ export async function batchUpdateProblem(urlParam, body){
   return request(DOMAIN + `/admin/maintain/problem/batchUpdate?${stringify(urlParam)}`,{method:"POST", body:body});
 }
 
+export async function delSelect(params) {
+    return request(DOMAIN + `/admin/maintain/select/delById?${stringify(params)}`);
+}
+
+
 
 

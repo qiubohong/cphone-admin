@@ -160,6 +160,22 @@ export default {
             });
             callback(response);
         },
+        *delSelect({ payload, callback = function(){} }, { call, put }) {
+            yield put({
+                type: 'changeLoading',
+                payload: true,
+            });
+            const response = yield call(recycle.delSelect, payload);
+            yield put({
+                type: 'id',
+                payload: response.data,
+            });
+            yield put({
+                type: 'changeLoading',
+                payload: false,
+            });
+            callback(response);
+        },
     },
     reducers: {
         id(state,action){
