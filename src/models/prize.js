@@ -55,6 +55,18 @@ export default {
             if (callback) {
                 callback();
             }
+        },
+        *send({ payload, callback=function(){}}, { call, put }) {
+            yield put({
+                type: 'changeLoading',
+                payload: true,
+            });
+            const response = yield call(prize.send, payload);
+            yield put({
+                type: 'changeLoading',
+                payload: false,
+            });
+            callback(response);
         }
     },
     reducers: {

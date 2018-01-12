@@ -13,5 +13,9 @@ export async function add(params) {
     return request(DOMAIN+`/CPhoneRaffle/rafflePrize/addPrize?${stringify(params)}`,{method:"post"});
 }
 
+export async function send(params) {
+  return request(DOMAIN+`/CPhoneRaffle/raffle/dispatchRaffle?${stringify(params)}`);
+}
+
 
 

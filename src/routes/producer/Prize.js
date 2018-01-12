@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import {Upload, Radio,  Popconfirm, Row, Col, Card, Form, Input, Select, Icon, Button, InputNumber, Table, Modal,Spin , message } from 'antd';
+import {notification, Upload, Radio,  Popconfirm, Row, Col, Card, Form, Input, Select, Icon, Button, InputNumber, Table, Modal,Spin , message } from 'antd';
 import StandardTable from '../../components/StandardTable';
 import PageHeaderLayout from '../../layouts/PageHeaderLayout';
 
@@ -21,7 +21,7 @@ export default class Prize extends PureComponent {
             prizeName:"",
             prizeValue: '', 
             prizeRaffleNum:'', 
-            prizeImgHttpPath: ''
+            prizeImgHttpPath: '',
         },
         modalVisible: false,
         operation: false,
@@ -33,6 +33,8 @@ export default class Prize extends PureComponent {
                 this.paginationChange(page,pageSize);
             }
         },
+        number: 0,
+        phone:"",
         fileList:[]
     };
 
@@ -135,6 +137,44 @@ export default class Prize extends PureComponent {
         });
     }
 
+    handlePhone = (e) => {
+        this.setState({
+            phone:e.target.value
+        })
+    }
+
+    handleNumer = (value) => {
+        this.setState({
+            number:value
+        })
+    }
+
+    sendPrize = ()=>{
+        let {phone, number} = this.state;
+        if(phone == ""){
+            message.error('用户手机号不能为空！');
+            return;
+        }
+        this.props.dispatch({
+            type: 'prize/send',
+            payload: {
+                customerPhone:phone,
+                raffleNum:number,
+            },
+            callback:(res)=>{
+                console.log(res)
+                if(res.status == 1){
+                    this.initQuery();
+                }else{
+                    notification.error({
+                        message: '创手机提示',
+                        description: res.message
+                    })
+                }
+            }
+        })
+    }
+
     render() {
         const { prize: { loading, data, one },} = this.props;
         const { modalVisible, addPrize, operation , pagination} = this.state;
@@ -224,6 +264,25 @@ export default class Prize extends PureComponent {
             <PageHeaderLayout title="奖品管理">
                 <Card bordered={false}>
                     <div className={styles.tableList}>
+                        <h2>发放奖品</h2>
+                        <div className={styles.tableListOperator}>
+                            <FormItem
+                                labelCol={{ span: 5 }}
+                                wrapperCol={{ span: 15 }}
+                                label="用户手机号"
+                            >
+                                <Input type="tel" placeholder="请输入用户手机号" onChange={this.handlePhone} value={this.state.phone} />
+                            </FormItem>
+                            <FormItem
+                                labelCol={{ span: 5 }}
+                                wrapperCol={{ span: 15 }}
+                                label="兑换码数量"
+                            >
+                                <InputNumber min={0} style={{width:200}} placeholder="请输入兑换码数量" defaultValue={0} onChange={(value)=>{this.handleNumer(value)}} />
+                            </FormItem>
+                            <Button loading={loading} type="primary" onClick={() => this.sendPrize()}>马上发放</Button>
+                        </div>
+                        <hr/>
                         <div className={styles.tableListOperator}>
                             <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>新建or替换当前奖品</Button>
                         </div>
